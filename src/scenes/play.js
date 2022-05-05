@@ -22,6 +22,7 @@ class Play extends Phaser.Scene {
             score : 0
         };
 
+        // torso and limbs
         this.torso = this.matter.add.image(width / 2, height / 2, 'limb', null,
             { ignoreGravity: true });
         this.torso.setOrigin(0.5, 0.5);
@@ -29,6 +30,7 @@ class Play extends Phaser.Scene {
         this.torso.setFixedRotation();
         this.torso.setMass(5000);
 
+        // limb number and IDs
         this.nLimbs = 5;
         this.headID = 0;
         this.leftArmID = 1;
@@ -36,6 +38,7 @@ class Play extends Phaser.Scene {
         this.rightFootID = 3;
         this.rightArmID = 4;
 
+        // limb spawn positions -- might be too far from torso right now?
         let limbPositions = [
             {x: width / 2, y: height / 4},
             {x: width / 4, y: height / 3},
@@ -43,13 +46,16 @@ class Play extends Phaser.Scene {
             {x: (width / 3) * 2, y: (height / 4) * 3},
             {x: (width / 4) * 3, y: height / 3}
         ];
+        // number of joints per limb
         let nLimbJoints = [2, 3, 4, 4, 3];
 
         this.limbs = new Array(this.nLimbs);
         this.limbJoints = new Array(this.nLimbs);
+        // create each limb and corresponding joints
         for (let n = 0; n < this.nLimbs; ++n) {
             let l = this.limbs[n];
             let lPos = limbPositions[n];
+            // create limb
             l = this.matter.add.image(lPos.x, lPos.y, 'limb', null,
                 { ignoreGravity: true });
             l.setOrigin(0.5, 0.5);
@@ -57,6 +63,7 @@ class Play extends Phaser.Scene {
             l.setFixedRotation();
             l.setMass(500);
 
+            // create and link joints
             let nJoints = nLimbJoints[n];
             let lj = this.limbJoints[n];
             lj = new Array(nJoints);
@@ -77,6 +84,7 @@ class Play extends Phaser.Scene {
             this.matter.add.joint(prev, l, 90, 1);
         }
 
+        // allows mouse to click and drag bodies
         this.matter.add.mouseSpring();
     }
 
