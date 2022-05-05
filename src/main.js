@@ -19,6 +19,3 @@ let Game = new Phaser.Game(config);
 let Audio = new AudioManager;
 
 // reserve keyboard vars
-let keyLEFT, keyRIGHT, keyUP, keyDOWN;
-let keyW, keyA, keyS, keyD;
-let keyENTER;

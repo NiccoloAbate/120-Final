@@ -15,6 +15,8 @@ class Menu extends Phaser.Scene {
         // menu text config
 
         // show loading text
+
+        this.defineKeys();
     }
 
     create() {
