@@ -103,8 +103,8 @@ class Play extends Phaser.Scene {
         ///////////////////////////////
         // delete once wall is done
         // test hitbox for holes
-        this.hitbox = this.add.image(width / 2, height / 2, 'torso', null,
-            { ignoreGravity: true });
+        this.hitbox = this.matter.add.image(width / 2, height / 2, 'torso', null,
+            { ignoreGravity: true, isSensor: true });
         this.hitbox.setOrigin(0.5, 0.5);
         this.hitbox.setScale(4,2);
         // delete once wall is done
@@ -121,7 +121,9 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
-
+        if (this.matter.overlap(this.hitbox, this.torso)) {
+            console.log('test');
+        }
         
     }
 
