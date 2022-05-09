@@ -29,6 +29,9 @@ class Play extends Phaser.Scene {
             score : 0
         };
 
+        // array that will hold all physics bodies of the player
+        this.playerBodies = new Array();
+
         // torso and limbs
         this.torso = this.matter.add.image(width / 2, height / 2, 'torso', null,
             { ignoreGravity: true });
@@ -36,7 +39,8 @@ class Play extends Phaser.Scene {
         this.torso.setScale(4, 4);
         this.torso.setFixedRotation();
         this.torso.setMass(20000);
-        
+
+        this.playerBodies.push(this.torso);
 
         // limb number and IDs
         this.nLimbs = 5;
@@ -74,6 +78,8 @@ class Play extends Phaser.Scene {
             l.setFixedRotation();
             l.setMass(5000);
 
+            this.playerBodies.push(l);
+
             // create and link joints
             let nJoints = nLimbJoints[n];
             let lj = this.limbJoints[n];
@@ -89,6 +95,8 @@ class Play extends Phaser.Scene {
                     { shape: 'circle', mass: 5, ignoreGravity: true });
                 j.setScale(2, 2);
                 this.matter.add.joint(prev, j, (i === 0) ? 90 : 55, 0.7);
+
+                this.playerBodies.push(j);
 
                 prev = j;
             }
@@ -121,17 +129,10 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
-        if (this.matter.overlap(this.hitbox, this.torso)) {
-            console.log('test');
+        if (this.matter.overlap(this.hitbox, this.playerBodies)) {
+            console.log('player is overlapping hitbox');
         }
         
-    }
-
-
-    checkCollision(sprite1, sprite2) {
-        let bounds1 = sprite1.getBounds();
-        let bounds2 = sprite2.getBounds();
-        return Phaser.Geom.Intersects.RectangleToRectangle(bounds1, bounds2);
     }
 
 
