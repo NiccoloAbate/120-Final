@@ -111,16 +111,16 @@ class Play extends Phaser.Scene {
         ///////////////////////////////
         // delete once wall is done
         // test hitbox for holes
-        this.hitbox = this.matter.add.image(width / 2, height / 2, 'torso', null,
-            { ignoreGravity: true, isSensor: true });
-        this.hitbox.setOrigin(0.5, 0.5);
-        this.hitbox.setScale(4,2);
+        //this.hitbox = this.matter.add.image(width / 2, height / 2, 'torso', null,
+        //    { ignoreGravity: true, isSensor: true });
+        //this.hitbox.setOrigin(0.5, 0.5);
+        //this.hitbox.setScale(4,2);
         // delete once wall is done
         ///////////////////////////////
 
 
         
-
+        this.generateWall();
 
 
         //debug
@@ -129,12 +129,41 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
-        if (this.matter.overlap(this.hitbox, this.playerBodies)) {
-            console.log('player is overlapping hitbox');
-        }
+        //if (this.matter.overlap(this.hitbox, this.playerBodies)) {
+        //    console.log('player is overlapping hitbox');
+        //}
         
+        if (this.isPlayerInHole()) {
+            console.log('player is in the hole!');
+        }
     }
 
+    generateWall() {
+        //this.currentwallPolies = new Array();
+        //for (let v of this.cache.json.get('wall1poly').Wall.fixtures[0].vertices) {
+        //    this.currentwallPolies.push(this.matter.add.polygon(0, 0, v.length - 1, 100, {isSensor: true, ignoreGravity: true, vertices: v}));
+        //}
+        this.currentWall = this.matter.add.sprite(0, 0, 'wall1', null, this.cache.json.get('wall1poly').Hole.fixtures[0]);
+        //this.currentWall = this.matter.add.sprite(0, 0, 'wall1', null, {isSensor: true, ignoreGravity: true,
+        //    vertices: [{x: 0, y: 0}, {x: 500, y: 0}, {x: 500, y: 500}, {x: 0, y: 500}]});
+        //this.currentWall.x = this.currentWall.width / 2;
+        //this.currentWall.y = this.currentWall.height / 2;
+        this.currentWall.setDepth(-1);
+        this.currentWall.body.isSensor = true;
+        this.currentWall.body.ignoreGravity = true;
+        //this.currentWall.displayWidth = Game.config.width;
+        //this.currentWall.displayHeight = Game.config.height;
+    }
+
+    isPlayerInHole() {
+        for (let b of this.playerBodies) {
+            if (!this.matter.overlap(this.currentWall.body, b)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     defineKeys() {
     }

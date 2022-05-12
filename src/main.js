@@ -3,7 +3,16 @@
 let config = {
     type: Phaser.CANVAS,
     physics: {
-        default: 'matter'
+        default: 'matter',
+            matter: {
+                gravity: {
+                y: 0
+            },
+            debug: {
+                showBody: true,
+                showStaticBody: true
+            }
+        }
     },
     //Game Canvas scales with width and height of window
     width: window.innerWidth * window.devicePixelRatio * 0.75,
