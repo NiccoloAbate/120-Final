@@ -103,8 +103,21 @@ class Play extends Phaser.Scene {
             this.matter.add.joint(prev, l, 90, 1);
         }
 
+        // all mouse dragable bodies, could add more if desired
+        this.mouseDragableBodies = [...this.playerBodies];
         // allows mouse to click and drag bodies
-        this.matter.add.mouseSpring();
+        this.mouseSpring = this.matter.add.mouseSpring();
+        // callback to restrict drag to player bodies
+        this.input.on('pointerdown', (pointer) => {
+            for (let b of this.mouseDragableBodies) {
+                if (this.mouseSpring.hitTestBody(b.body, pointer.position)) {
+                    // if pointer is hitting with any player body let drag continue
+                    return;
+                }
+            }
+            // if pointer isn't hitting any player body stop drag
+            this.mouseSpring.stopDrag();
+        });
 
 
 
