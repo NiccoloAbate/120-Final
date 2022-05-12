@@ -91,7 +91,7 @@ class Play extends Phaser.Scene {
                 let x = this.torso.x + ((i / nJoints) * posDiff.x);
                 let y = this.torso.y + ((i / nJoints) * posDiff.y);
                 
-                j = this.matter.add.image(400, y, 'joint', null,
+                j = this.matter.add.image(x, y, 'joint', null,
                     { shape: 'circle', mass: 5, ignoreGravity: true });
                 j.setScale(2, 2);
                 this.matter.add.joint(prev, j, (i === 0) ? 90 : 55, 0.7);
@@ -139,29 +139,34 @@ class Play extends Phaser.Scene {
     }
 
     generateWall() {
-        //this.currentwallPolies = new Array();
-        //for (let v of this.cache.json.get('wall1poly').Wall.fixtures[0].vertices) {
-        //    this.currentwallPolies.push(this.matter.add.polygon(0, 0, v.length - 1, 100, {isSensor: true, ignoreGravity: true, vertices: v}));
-        //}
-        this.currentWall = this.matter.add.sprite(0, 0, 'wall1', null, this.cache.json.get('wall1poly').Hole.fixtures[0]);
-        //this.currentWall = this.matter.add.sprite(0, 0, 'wall1', null, {isSensor: true, ignoreGravity: true,
-        //    vertices: [{x: 0, y: 0}, {x: 500, y: 0}, {x: 500, y: 500}, {x: 0, y: 500}]});
-        //this.currentWall.x = this.currentWall.width / 2;
-        //this.currentWall.y = this.currentWall.height / 2;
+        this.currentWall = this.matter.add.image(0, 0, 'wall1', null, {ignoreGravity: true, isSensor: true});
         this.currentWall.setDepth(-1);
-        this.currentWall.body.isSensor = true;
-        this.currentWall.body.ignoreGravity = true;
-        //this.currentWall.displayWidth = Game.config.width;
-        //this.currentWall.displayHeight = Game.config.height;
+        this.currentWall.displayWidth = Game.config.width;
+        this.currentWall.displayHeight = Game.config.height;
+        this.currentWall.x = this.currentWall.displayWidth / 2;
+        this.currentWall.y = this.currentWall.displayHeight / 2;
     }
 
     isPlayerInHole() {
+        let Wall = this.currentWall;
+
         for (let b of this.playerBodies) {
-            if (!this.matter.overlap(this.currentWall.body, b)) {
-                return false;
+            // all play bodies must be in the transparent part of the texture
+            if (this.matter.overlap(Wall, b)) {
+                // Check center of the body against the texture
+                let xCheck = ((b.x + b.body.centerOffset.x) - Wall.getTopLeft().x) / Wall.scaleX;
+                let yCheck = ((b.y + b.body.centerOffset.y) - Wall.getTopLeft().y) / Wall.scaleY;
+                if ((this.textures.getPixelAlpha(
+                      Math.floor(xCheck),
+                      Math.floor(yCheck),
+                      Wall.texture.key
+                    ) === 255)) {
+                    return false;
+                }
             }
         }
 
+        // if all are in the transparent part of the texture, then player is in the hole
         return true;
     }
 
