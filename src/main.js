@@ -27,4 +27,7 @@ let Game = new Phaser.Game(config);
 
 let Audio = new AudioManager;
 
+let playerMoveStartSounds = 5;
+let playerMoveContSounds = 6;
+
 // reserve keyboard vars

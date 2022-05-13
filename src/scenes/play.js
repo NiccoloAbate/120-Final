@@ -10,6 +10,13 @@ class Play extends Phaser.Scene {
         this.load.image('joint', 'assets/sprites/Joints.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
 
+        for (let i = 1; i <= playerMoveStartSounds; ++i) {
+            this.load.audio('playerStart' + i, 'assets/sfx/player/Start 0' + i + '.wav');
+        }
+        for (let i = 1; i <= playerMoveContSounds; ++i) {
+            this.load.audio('playerCont' + i, 'assets/sfx/player/Cont 0' + i + '.wav');
+        }
+
         this.defineKeys();
     }
 
@@ -119,7 +126,13 @@ class Play extends Phaser.Scene {
             this.mouseSpring.stopDrag();
         });
 
+        // state machine to handle some player stuff
+        this.playerFSM = new StateMachine('idle', {
+            idle: new IdleState(),
+            move: new MoveState(),
+        }, [this]);
 
+        this.playerCurrentMoveSound = undefined;
 
         ///////////////////////////////
         // delete once wall is done
@@ -146,9 +159,24 @@ class Play extends Phaser.Scene {
         //    console.log('player is overlapping hitbox');
         //}
         
+        this.playerFSM.step();
+
         if (this.isPlayerInHole()) {
             console.log('player is in the hole!');
         }
+    }
+
+    playerMovementValue() {
+        let velocities = new Array();
+
+        const maxV = 10;
+        for (let b of this.playerBodies) {
+            velocities.push(vecLenSqrd(b.body.velocity));
+        }
+
+        //console.log(getAvg(velocities));
+
+        return Math.min(getAvg(velocities), maxV) / maxV;
     }
 
     generateWall() {
@@ -190,5 +218,61 @@ class Play extends Phaser.Scene {
         this.input.keyboard.on('keydown-R', (event) => {
             console.log("yeahsss");
         });
+    }
+}
+
+
+// player States, just for audio right now
+
+const moveThresh = 0.005;
+const moveVolumeMult = 1.5;
+function moveValToVolume(v) {
+    return Math.sqrt(v) * moveVolumeMult;
+};
+
+class IdleState extends State {
+    enter(scene) {
+        //console.log('enter idle');
+        if (scene.playerCurrentMoveSound != undefined) {
+            scene.playerCurrentMoveSound.destroy();
+            scene.playerCurrentMoveSound = undefined;
+        }
+    }
+
+    execute(scene) {
+        if (scene.playerMovementValue() > moveThresh) {
+            this.stateMachine.transition('move');
+        }
+    }
+}
+
+class MoveState extends State {
+    enter(scene) {
+        //console.log('enter move');
+        let moveValue = scene.playerMovementValue();
+
+        if (scene.playerCurrentMoveSound == undefined) {
+            let startSoundName = 'playerStart' + getRandomIntInclusive(1, playerMoveStartSounds);
+            scene.playerCurrentMoveSound = scene.sound.add(startSoundName, { volume: moveValToVolume(moveValue) });
+            scene.playerCurrentMoveSound.play();
+        }
+    }
+
+    execute(scene) {
+        let moveValue = scene.playerMovementValue();
+
+        if (moveValue <= moveThresh) {
+            this.stateMachine.transition('idle');
+            return;
+        }
+
+        if (!scene.playerCurrentMoveSound.isPlaying) {
+            scene.playerCurrentMoveSound.destroy();
+            let contSoundName = 'playerCont' + getRandomIntInclusive(1, playerMoveContSounds);
+            scene.playerCurrentMoveSound = scene.sound.add(contSoundName);
+            scene.playerCurrentMoveSound.play();
+        }
+
+        scene.playerCurrentMoveSound.setVolume(moveValToVolume(moveValue));
     }
 }

@@ -66,3 +66,20 @@ let UpdateTime = {
     mRatio: 60000
 }
 
+function getAvg(arr) {
+  if (arr.length == 0) {
+    return 0;
+  }
+
+  let total = 0;
+  for (let x of arr) {
+    total += x;
+  }
+
+  return total / arr.length;
+}
+
+function vecLenSqrd(v) {
+  return (v.x * v.x) + (v.y * v.y);
+}
+
