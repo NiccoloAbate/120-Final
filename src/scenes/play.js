@@ -18,7 +18,7 @@ class Play extends Phaser.Scene {
             this.load.audio('playerCont' + i, 'assets/sfx/player/Cont 0' + i + '.wav');
         }
 
-        
+        this.load.audio('ding', 'assets/sfx/Ding.wav');
 
         this.defineKeys();
     }
@@ -40,11 +40,28 @@ class Play extends Phaser.Scene {
         };
 
         this.player = new Player(this);  
-
+        this.playerInHole = false;
 
         
         this.generateWall();
 
+
+
+        // display score
+        this.textConfig = {
+            fontFamily: 'Courier',
+            fontSize: '28px',
+            backgroundColor: '#FFFFFF',
+            color: '#000000',
+            align: 'right',
+            padding: {
+            top: 5,
+            bottom: 5,
+            },
+            fixedWidth: 100
+        }
+        this.percentInText = this.add.text(Game.config.width - (borderUISize + borderPadding) - this.textConfig.fixedWidth,
+            borderUISize, '0%', this.textConfig);
 
         //debug
         this.createDebugKeybinds();
@@ -54,9 +71,23 @@ class Play extends Phaser.Scene {
         
         this.player.update();
 
-        if (this.isPlayerInHole()) {
-            console.log('player is in the hole!');
+        this.percentInHole = this.percentPlayerInHole();
+        if (this.percentInHole == 1) {
+            //console.log('player is in the hole!');
+            if (!this.playerInHole) {
+                this.playerInHole = true;
+                this.sound.play('ding', { volume: 0.5 });
+            }
         }
+        else {
+            if (this.playerInHole) {
+                this.playerInHole = false;
+                this.sound.play('ding', { volume: 0.5, detune: -1200 });
+            }
+        }
+
+        let formatPercentText = (p) => parseFloat(p * 100).toFixed(0) + "%";
+        this.percentInText.text = formatPercentText(this.percentInHole);
     }
 
     generateWall() {
@@ -66,6 +97,25 @@ class Play extends Phaser.Scene {
         this.currentWall.displayHeight = Game.config.height;
         this.currentWall.x = this.currentWall.displayWidth / 2;
         this.currentWall.y = this.currentWall.displayHeight / 2;
+
+        const wallDuration = 30000;
+        this.tweens.add({
+            targets: this.currentWall, 
+            alpha: { from: 0.5, to: 1.0 },
+            duration: wallDuration,
+            ease: 'Linear',
+            repeat: 0 
+        });
+        this.time.delayedCall(wallDuration, () => this.wallCheck())
+    }
+
+    wallCheck() {
+        if (this.isPlayerInHole()) {
+            console.log('you did it!');
+        }
+        else {
+            console.log('you got owned by that there wall');
+        }
     }
 
     isPlayerInHole() {
@@ -89,6 +139,29 @@ class Play extends Phaser.Scene {
 
         // if all are in the transparent part of the texture, then player is in the hole
         return true;
+    }
+
+    percentPlayerInHole() {
+        let Wall = this.currentWall;
+
+        let nInHole = 0;
+        for (let b of this.player.bodies) {
+            // all play bodies must be in the transparent part of the texture
+            if (this.matter.overlap(Wall, b)) {
+                // Check center of the body against the texture
+                let xCheck = ((b.x + b.body.centerOffset.x) - Wall.getTopLeft().x) / Wall.scaleX;
+                let yCheck = ((b.y + b.body.centerOffset.y) - Wall.getTopLeft().y) / Wall.scaleY;
+                if ((this.textures.getPixelAlpha(
+                      Math.floor(xCheck),
+                      Math.floor(yCheck),
+                      Wall.texture.key
+                    ) === 0)) {
+                    ++nInHole;
+                }
+            }
+        }
+
+        return nInHole / this.player.bodies.length;
     }
 
     defineKeys() {
