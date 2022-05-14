@@ -36,103 +36,7 @@ class Play extends Phaser.Scene {
             score : 0
         };
 
-        // array that will hold all physics bodies of the player
-        this.playerBodies = new Array();
-
-        // torso and limbs
-        this.torso = this.matter.add.image(width / 2, height / 2, 'torso', null,
-            { ignoreGravity: true });
-        this.torso.setOrigin(0.5, 0.5);
-        this.torso.setScale(4, 4);
-        this.torso.setFixedRotation();
-        this.torso.setMass(20000);
-
-        this.playerBodies.push(this.torso);
-
-        // limb number and IDs
-        this.nLimbs = 5;
-        this.headID = 0;
-        this.leftArmID = 1;
-        this.leftFootID = 2;
-        this.rightFootID = 3;
-        this.rightArmID = 4;
-
-        // limb spawn positions -- might be too far from torso right now?
-        let limbPositions = [
-            {x: width / 2, y: height / 4},
-            {x: width / 4, y: height / 3},
-            {x: width / 3, y: (height / 4) * 3},
-            {x: (width / 3) * 2, y: (height / 4) * 3},
-            {x: (width / 4) * 3, y: height / 3}
-        ];
-        // number of joints per limb
-        let nLimbJoints = [2, 3, 4, 4, 3];
-        
-        // image for each limb
-        let limbImage = ['head', 'hand', 'feet', 'feet', 'hand'];
-
-        this.limbs = new Array(this.nLimbs);
-        this.limbJoints = new Array(this.nLimbs);
-        // create each limb and corresponding joints
-        for (let n = 0; n < this.nLimbs; ++n) {
-            let l = this.limbs[n];
-            let lPos = limbPositions[n];
-            // create limb
-            l = this.matter.add.image(lPos.x, lPos.y, limbImage[n], null,
-                { ignoreGravity: true });
-            l.setOrigin(0.5, 0.5);
-            l.setScale(4, 4);
-            l.setFixedRotation();
-            l.setMass(5000);
-
-            this.playerBodies.push(l);
-
-            // create and link joints
-            let nJoints = nLimbJoints[n];
-            let lj = this.limbJoints[n];
-            lj = new Array(nJoints);
-            let prev = this.torso;
-            let posDiff = {x: l.x - this.torso.x, y: l.y - this.torso.y};
-            for (let i = 0; i < lj.length; ++i) {
-                let j = lj[i];
-                let x = this.torso.x + ((i / nJoints) * posDiff.x);
-                let y = this.torso.y + ((i / nJoints) * posDiff.y);
-                
-                j = this.matter.add.image(x, y, 'joint', null,
-                    { shape: 'circle', mass: 5, ignoreGravity: true });
-                j.setScale(2, 2);
-                this.matter.add.joint(prev, j, (i === 0) ? 90 : 55, 0.7);
-
-                this.playerBodies.push(j);
-
-                prev = j;
-            }
-            this.matter.add.joint(prev, l, 90, 1);
-        }
-
-        // all mouse dragable bodies, could add more if desired
-        this.mouseDragableBodies = [...this.playerBodies];
-        // allows mouse to click and drag bodies
-        this.mouseSpring = this.matter.add.mouseSpring();
-        // callback to restrict drag to player bodies
-        this.input.on('pointerdown', (pointer) => {
-            for (let b of this.mouseDragableBodies) {
-                if (this.mouseSpring.hitTestBody(b.body, pointer.position)) {
-                    // if pointer is hitting with any player body let drag continue
-                    return;
-                }
-            }
-            // if pointer isn't hitting any player body stop drag
-            this.mouseSpring.stopDrag();
-        });
-
-        // state machine to handle some player stuff
-        this.playerFSM = new StateMachine('idle', {
-            idle: new IdleState(),
-            move: new MoveState(),
-        }, [this]);
-
-        this.playerCurrentMoveSound = undefined;
+        this.player = new Player(this);        
 
         ///////////////////////////////
         // delete once wall is done
@@ -155,28 +59,11 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
-        //if (this.matter.overlap(this.hitbox, this.playerBodies)) {
-        //    console.log('player is overlapping hitbox');
-        //}
-        
-        this.playerFSM.step();
+        this.player.update();
 
         if (this.isPlayerInHole()) {
             console.log('player is in the hole!');
         }
-    }
-
-    playerMovementValue() {
-        let velocities = new Array();
-
-        const maxV = 10;
-        for (let b of this.playerBodies) {
-            velocities.push(vecLenSqrd(b.body.velocity));
-        }
-
-        //console.log(getAvg(velocities));
-
-        return Math.min(getAvg(velocities), maxV) / maxV;
     }
 
     generateWall() {
@@ -191,7 +78,7 @@ class Play extends Phaser.Scene {
     isPlayerInHole() {
         let Wall = this.currentWall;
 
-        for (let b of this.playerBodies) {
+        for (let b of this.player.bodies) {
             // all play bodies must be in the transparent part of the texture
             if (this.matter.overlap(Wall, b)) {
                 // Check center of the body against the texture
@@ -222,57 +109,4 @@ class Play extends Phaser.Scene {
 }
 
 
-// player States, just for audio right now
 
-const moveThresh = 0.005;
-const moveVolumeMult = 1.5;
-function moveValToVolume(v) {
-    return Math.sqrt(v) * moveVolumeMult;
-};
-
-class IdleState extends State {
-    enter(scene) {
-        //console.log('enter idle');
-        if (scene.playerCurrentMoveSound != undefined) {
-            scene.playerCurrentMoveSound.destroy();
-            scene.playerCurrentMoveSound = undefined;
-        }
-    }
-
-    execute(scene) {
-        if (scene.playerMovementValue() > moveThresh) {
-            this.stateMachine.transition('move');
-        }
-    }
-}
-
-class MoveState extends State {
-    enter(scene) {
-        //console.log('enter move');
-        let moveValue = scene.playerMovementValue();
-
-        if (scene.playerCurrentMoveSound == undefined) {
-            let startSoundName = 'playerStart' + getRandomIntInclusive(1, playerMoveStartSounds);
-            scene.playerCurrentMoveSound = scene.sound.add(startSoundName, { volume: moveValToVolume(moveValue) });
-            scene.playerCurrentMoveSound.play();
-        }
-    }
-
-    execute(scene) {
-        let moveValue = scene.playerMovementValue();
-
-        if (moveValue <= moveThresh) {
-            this.stateMachine.transition('idle');
-            return;
-        }
-
-        if (!scene.playerCurrentMoveSound.isPlaying) {
-            scene.playerCurrentMoveSound.destroy();
-            let contSoundName = 'playerCont' + getRandomIntInclusive(1, playerMoveContSounds);
-            scene.playerCurrentMoveSound = scene.sound.add(contSoundName);
-            scene.playerCurrentMoveSound.play();
-        }
-
-        scene.playerCurrentMoveSound.setVolume(moveValToVolume(moveValue));
-    }
-}
