@@ -214,6 +214,7 @@ class MoveState extends State {
         //console.log('enter move');
         let moveValue = player.movementValue();
 
+        // sound
         if (player.currentMoveSound == undefined) {
             let startSoundName = 'playerStart' + getRandomIntInclusive(1, playerMoveStartSounds);
             player.currentMoveSound = scene.sound.add(startSoundName, { volume: moveValToVolume(moveValue) });
@@ -229,6 +230,7 @@ class MoveState extends State {
             return;
         }
 
+        // sound
         if (!player.currentMoveSound.isPlaying) {
             player.currentMoveSound.destroy();
             let contSoundName = 'playerCont' + getRandomIntInclusive(1, playerMoveContSounds);

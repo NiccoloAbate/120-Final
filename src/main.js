@@ -8,16 +8,20 @@ let config = {
                 gravity: {
                 y: 0
             },
+            
             debug: {
                 showBody: true,
                 showStaticBody: true
             }
+            
         }
     },
     //Game Canvas scales with width and height of window
-    width: window.innerWidth * window.devicePixelRatio * 0.75,
-    height: window.innerHeight * window.devicePixelRatio,
-    scene: [Menu, Play, GameOver]
+    //width: window.innerWidth * window.devicePixelRatio * 0.75,
+    //height: window.innerHeight * window.devicePixelRatio,
+    width: 1600,
+    height: 900,
+    scene: [Menu, Play]
 }
 
 let borderUISize = config.height / 15;

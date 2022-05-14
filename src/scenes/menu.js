@@ -11,7 +11,12 @@ class Menu extends Phaser.Scene {
         
 
         // load images/tile sprites
-        this.load.image('wall1', 'assets/sprites/WallBackground-Hole1.png');
+        this.load.image('hole1', 'assets/sprites/WallBackground-Hole1.png');
+        this.load.image('hole2', 'assets/sprites/WallBackground-Hole2.png');
+        this.load.image('hole2outline', 'assets/sprites/WallBackground-Hole2Outline.png');
+
+        this.load.image('background', 'assets/sprites/Background.png');
+
 
         // player assets
         this.load.image('head', 'assets/sprites/CircleToHit.png');

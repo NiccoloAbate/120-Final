@@ -62,6 +62,17 @@ class Play extends Phaser.Scene {
         }
         this.percentInText = this.add.text(Game.config.width - (borderUISize + borderPadding) - this.textConfig.fixedWidth,
             borderUISize, '0%', this.textConfig);
+        
+        this.wallTimeBar = this.add.rectangle(borderUISize, borderUISize, 250, 30, '0x0000ff');
+        this.wallTimeBar.setOrigin(0, 0);
+
+        // create background
+        this.background = this.matter.add.image(0, 0, 'background', null, {ignoreGravity: true, isSensor: true});
+        this.background.setDepth(-2);
+        this.background.displayWidth = Game.config.width;
+        this.background.displayHeight = Game.config.height;
+        this.background.x = this.background.displayWidth / 2;
+        this.background.y = this.background.displayHeight / 2;
 
         //debug
         this.createDebugKeybinds();
@@ -69,11 +80,20 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
+        this.wallTimer -= delta;
+        if (this.wallTimer < 0) {
+            this.wallCheck();
+        }
+        else {
+            this.wallTimeBar.scaleX = this.wallTimer / this.wallDuration;
+        }
+
         this.player.update();
 
         this.percentInHole = this.percentPlayerInHole();
         if (this.percentInHole == 1) {
-            //console.log('player is in the hole!');
+            // player fully inside
+            // if this remains true 3 seconds
             if (!this.playerInHole) {
                 this.playerInHole = true;
                 this.sound.play('ding', { volume: 0.5 });
@@ -91,22 +111,42 @@ class Play extends Phaser.Scene {
     }
 
     generateWall() {
-        this.currentWall = this.matter.add.image(0, 0, 'wall1', null, {ignoreGravity: true, isSensor: true});
-        this.currentWall.setDepth(-1);
-        this.currentWall.displayWidth = Game.config.width;
-        this.currentWall.displayHeight = Game.config.height;
-        this.currentWall.x = this.currentWall.displayWidth / 2;
-        this.currentWall.y = this.currentWall.displayHeight / 2;
+        this.currentWallCollision = this.matter.add.image(0, 0, 'hole2', null, {ignoreGravity: true, isSensor: true});
+        this.currentWallCollision.setDepth(-1);
+        this.currentWallCollision.displayWidth = Game.config.width;
+        this.currentWallCollision.displayHeight = Game.config.height;
+        this.currentWallCollision.x = this.currentWallCollision.displayWidth / 2;
+        this.currentWallCollision.y = this.currentWallCollision.displayHeight / 2;
+        this.currentWallCollision.setAlpha(0);
 
-        const wallDuration = 30000;
+        this.currentWallImage = this.matter.add.image(0, 0, 'hole2', null, {ignoreGravity: true, isSensor: true});
+        this.currentWallImage.setDepth(-1);
+        this.currentWallImage.displayWidth = Game.config.width;
+        this.currentWallImage.displayHeight = Game.config.height;
+        this.currentWallImage.x = this.currentWallImage.displayWidth / 2;
+        this.currentWallImage.y = this.currentWallImage.displayHeight;
+
+        this.currentWallOutline = this.matter.add.image(0, 0, 'hole2outline', null, {ignoreGravity: true, isSensor: true});
+        this.currentWallOutline.setDepth(-1);
+        this.currentWallOutline.displayWidth = Game.config.width;
+        this.currentWallOutline.displayHeight = Game.config.height;
+        this.currentWallOutline.x = this.currentWallOutline.displayWidth / 2;
+        this.currentWallOutline.y = this.currentWallOutline.displayHeight / 2;
+
+        this.wallDuration = 10000;
+        this.wallTimer = this.wallDuration;
         this.tweens.add({
-            targets: this.currentWall, 
-            alpha: { from: 0.5, to: 1.0 },
-            duration: wallDuration,
-            ease: 'Linear',
+            targets: this.currentWallImage,
+            //displayWidth: { from: 0.0, to: this.currentWallImage.displayWidth },
+            //displayHeight: { from: 0.0, to: this.currentWallImage.displayHeight },
+            scaleX: { from: 0.00001, to: this.currentWallImage.scaleX},
+            scaleY: { from: 0.00001, to: this.currentWallImage.scaleY},
+            y: { from: this.currentWallImage.displayHeight - 100, to: this.currentWallImage.displayHeight / 2 },
+            
+            duration: this.wallDuration,
+            ease: 'Quad.easeIn',
             repeat: 0 
         });
-        this.time.delayedCall(wallDuration, () => this.wallCheck())
     }
 
     wallCheck() {
@@ -119,7 +159,7 @@ class Play extends Phaser.Scene {
     }
 
     isPlayerInHole() {
-        let Wall = this.currentWall;
+        let Wall = this.currentWallCollision;
 
         for (let b of this.player.bodies) {
             // all play bodies must be in the transparent part of the texture
@@ -142,7 +182,7 @@ class Play extends Phaser.Scene {
     }
 
     percentPlayerInHole() {
-        let Wall = this.currentWall;
+        let Wall = this.currentWallCollision;
 
         let nInHole = 0;
         for (let b of this.player.bodies) {
