@@ -41,10 +41,16 @@ class Play extends Phaser.Scene {
         ///////////////////////////////
         // delete once wall is done
         // test hitbox for holes
-        //this.hitbox = this.matter.add.image(width / 2, height / 2, 'torso', null,
-        //    { ignoreGravity: true, isSensor: true });
-        //this.hitbox.setOrigin(0.5, 0.5);
-        //this.hitbox.setScale(4,2);
+        this.hitbox = this.matter.add.image(width / 4, height / 4, 'torso', null,
+            { ignoreGravity: true, isSensor: true });
+        this.hitbox.setOrigin(0.5, 0.5);
+        this.hitbox.setScale(4,2);
+
+        this.player.dragOverlapTargets.push(this.hitbox);
+        this.player.dragCallbacks.dragStart.push(l => console.log('drag start'));
+        this.player.dragCallbacks.dragEnd.push(l => console.log('drag end'));
+        this.player.dragCallbacks.overlapEnter.push((l, t) => console.log('drag overlap enter'));
+        this.player.dragCallbacks.overlapExit.push((l, t) => console.log('drag overlap exit'));
         // delete once wall is done
         ///////////////////////////////
 

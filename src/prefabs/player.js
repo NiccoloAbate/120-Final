@@ -92,6 +92,10 @@ class Player {
             for (let b of this.bodies) {
                 if (this.mouseSpring.hitTestBody(b.body, pointer.position)) {
                     // if pointer is hitting with any player body let drag continue
+                    // also set up logic for dragging callbacks
+                    this.mouseDragTarget = b;
+                    // call drag start callbacks
+                    this.dragCallbacks.dragStart.forEach(c => c(this.mouseDragTarget));
                     return;
                 }
             }
@@ -105,11 +109,60 @@ class Player {
             move: new MoveState(),
         }, [this.scene, this]);
 
+        // movement sound, handled by state machine
         this.currentMoveSound = undefined;
+
+        this.mouseDragTarget = undefined;
+        // must be callbacks of type (limb, [body]) =>
+        this.dragCallbacks = {
+            dragStart: [],
+            overlap: [],
+            overlapEnter: [],
+            overlapExit: [],
+            dragEnd: []
+        }
+        this.dragOverlappedObjects = [];
+
+        this.scene.input.on('pointerup', (pointer) => {
+            // call drag end callbacks
+            this.dragCallbacks.dragEnd.forEach(c => c(this.mouseDragTarget));
+            // empty the drag overlap objects
+            this.dragOverlappedObjects = [];
+            // reset mouse drag target
+            this.mouseDragTarget = undefined;
+        });
+        
+        // add targets into this if you want to check them for drag overlapping
+        this.dragOverlapTargets = [];
     }
 
     update() {
         this.FSM.step();
+
+        // check drag overlap callbacks
+        if (this.mouseDragTarget != undefined) {
+            for (let t of this.dragOverlapTargets) {
+                if (this.scene.matter.overlap(this.mouseDragTarget, t)) {
+                    // call overlap callbacks
+                    this.dragCallbacks.overlap.forEach(c => c(this.mouseDragTarget, t));
+
+                    // if first overlap
+                    if (!this.dragOverlappedObjects.includes(t)) {
+                        // call overlap enter callbacks and add to list of current overlaps
+                        this.dragCallbacks.overlapEnter.forEach(c => c(this.mouseDragTarget, t));
+                        this.dragOverlappedObjects.push(t);
+                    }
+                }
+                else {
+                    // if first non-overlap
+                    if (this.dragOverlappedObjects.includes(t)) {
+                        // call overlap exit callbacks and remove from list of current overlaps
+                        this.dragCallbacks.overlapExit.forEach(c => c(this.mouseDragTarget, t));
+                        this.dragOverlappedObjects.splice(this.dragOverlappedObjects.indexOf(t));
+                    }
+                }
+            }
+        }
     }
 
     movementValue() {
