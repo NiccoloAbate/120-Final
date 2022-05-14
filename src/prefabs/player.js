@@ -18,7 +18,7 @@ class Player {
         this.torso = this.scene.matter.add.image(width / 2, height / 2, 'torso', null,
             { ignoreGravity: true });
         this.torso.setOrigin(0.5, 0.5);
-        this.torso.setScale(4, 4);
+        this.torso.setScale(0.75, 0.75);
         this.torso.setFixedRotation();
         this.torso.setMass(20000);
 
@@ -44,38 +44,44 @@ class Player {
         let nLimbJoints = [2, 3, 4, 4, 3];
         
         // image for each limb
-        let limbImage = ['head', 'hand', 'feet', 'feet', 'hand'];
+        let limbTypes = ['head', 'hand', 'feet', 'feet', 'hand'];
+        let limbImage = ['head', 'handclosed', 'feet', 'feet', 'handclosed'];
 
         this.limbs = new Array(this.nLimbs);
         this.limbJoints = new Array(this.nLimbs);
         // create each limb and corresponding joints
         for (let n = 0; n < this.nLimbs; ++n) {
-            let l = this.limbs[n];
             let lPos = limbPositions[n];
             // create limb
-            l = this.scene.matter.add.image(lPos.x, lPos.y, limbImage[n], null,
-                { ignoreGravity: true });
+            this.limbs[n] = this.scene.matter.add.image(lPos.x, lPos.y, limbImage[n], null,
+                { shape: 'circle', ignoreGravity: true });
+            let l = this.limbs[n];
+
             l.setOrigin(0.5, 0.5);
-            l.setScale(4, 4);
+            l.setScale(0.6, 0.6);
             l.setFixedRotation();
             l.setMass(5000);
+            l.limbType = limbTypes[n];
 
             this.bodies.push(l);
 
             // create and link joints
             let nJoints = nLimbJoints[n];
+            this.limbJoints[n] = new Array(nJoints);
             let lj = this.limbJoints[n];
-            lj = new Array(nJoints);
+
             let prev = this.torso;
             let posDiff = {x: l.x - this.torso.x, y: l.y - this.torso.y};
             for (let i = 0; i < lj.length; ++i) {
-                let j = lj[i];
                 let x = this.torso.x + ((i / nJoints) * posDiff.x);
                 let y = this.torso.y + ((i / nJoints) * posDiff.y);
                 
-                j = this.scene.matter.add.image(x, y, 'joint', null,
+                lj[i] = this.scene.matter.add.image(x, y, 'joint', null,
                     { shape: 'circle', mass: 5, ignoreGravity: true });
+                let j = lj[i];
+
                 j.setScale(2, 2);
+                j.limbType = 'joint';
                 this.scene.matter.add.joint(prev, j, (i === 0) ? 90 : 55, 0.7);
 
                 this.bodies.push(j);
@@ -84,6 +90,10 @@ class Player {
             }
             this.scene.matter.add.joint(prev, l, 90, 1);
         }
+
+        console.log(this.limbs);
+        this.limbs[this.rightArmID].flipX = true;
+        this.limbs[this.rightFootID].flipX = true;
 
         // allows mouse to click and drag bodies
         this.mouseSpring = this.scene.matter.add.mouseSpring();

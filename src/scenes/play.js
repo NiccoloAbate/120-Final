@@ -5,9 +5,10 @@ class Play extends Phaser.Scene {
 
     preload() {
         // player assets
-        this.load.image('head', 'assets/sprites/CircleToHit.png');
-        this.load.image('hand', 'assets/sprites/ObsticleX.png');
-        this.load.image('feet', 'assets/sprites/PlayerBlock.png');
+        this.load.image('head', 'assets/sprites/Head.png');
+        this.load.image('handclosed', 'assets/sprites/Hand-ClosedFingers.png');
+        this.load.image('handopen', 'assets/sprites/Hand-OpenFingers.png');
+        this.load.image('feet', 'assets/sprites/Shoe.png');
         this.load.image('joint', 'assets/sprites/Joints.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
 
@@ -80,11 +81,17 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
-        this.wallTimer -= delta;
         if (this.wallTimer < 0) {
-            this.wallCheck();
+            if (this.wallTimer == -100000) {
+
+            }
+            else {
+                this.wallCheck();
+                this.wallTimer = -100000;
+            }
         }
         else {
+            this.wallTimer -= delta;
             this.wallTimeBar.scaleX = this.wallTimer / this.wallDuration;
         }
 
@@ -96,13 +103,13 @@ class Play extends Phaser.Scene {
             // if this remains true 3 seconds
             if (!this.playerInHole) {
                 this.playerInHole = true;
-                this.sound.play('ding', { volume: 0.5 });
+                this.playSuccessSound();
             }
         }
         else {
             if (this.playerInHole) {
                 this.playerInHole = false;
-                this.sound.play('ding', { volume: 0.5, detune: -1200 });
+                this.playFailureSound();
             }
         }
 
@@ -152,9 +159,11 @@ class Play extends Phaser.Scene {
     wallCheck() {
         if (this.isPlayerInHole()) {
             console.log('you did it!');
+            this.playSuccessSound();
         }
         else {
             console.log('you got owned by that there wall');
+            this.playFailureSound();
         }
     }
 
@@ -165,8 +174,8 @@ class Play extends Phaser.Scene {
             // all play bodies must be in the transparent part of the texture
             if (this.matter.overlap(Wall, b)) {
                 // Check center of the body against the texture
-                let xCheck = ((b.x + b.body.centerOffset.x) - Wall.getTopLeft().x) / Wall.scaleX;
-                let yCheck = ((b.y + b.body.centerOffset.y) - Wall.getTopLeft().y) / Wall.scaleY;
+                let xCheck = (b.x + - Wall.getTopLeft().x) / Wall.scaleX;
+                let yCheck = (b.y - Wall.getTopLeft().y) / Wall.scaleY;
                 if ((this.textures.getPixelAlpha(
                       Math.floor(xCheck),
                       Math.floor(yCheck),
@@ -189,8 +198,8 @@ class Play extends Phaser.Scene {
             // all play bodies must be in the transparent part of the texture
             if (this.matter.overlap(Wall, b)) {
                 // Check center of the body against the texture
-                let xCheck = ((b.x + b.body.centerOffset.x) - Wall.getTopLeft().x) / Wall.scaleX;
-                let yCheck = ((b.y + b.body.centerOffset.y) - Wall.getTopLeft().y) / Wall.scaleY;
+                let xCheck = (b.x - Wall.getTopLeft().x) / Wall.scaleX;
+                let yCheck = (b.y - Wall.getTopLeft().y) / Wall.scaleY;
                 if ((this.textures.getPixelAlpha(
                       Math.floor(xCheck),
                       Math.floor(yCheck),
@@ -205,6 +214,13 @@ class Play extends Phaser.Scene {
     }
 
     defineKeys() {
+    }
+
+    playSuccessSound() {
+        this.sound.play('ding', { volume: 0.2 });
+    }
+    playFailureSound() {
+        this.sound.play('ding', { volume: 0.2, detune: -1200 });
     }
 
     createDebugKeybinds() {

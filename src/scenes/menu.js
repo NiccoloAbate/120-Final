@@ -17,11 +17,16 @@ class Menu extends Phaser.Scene {
 
         this.load.image('background', 'assets/sprites/Background.png');
 
+        // menu assets
+        this.load.image('playButton', 'assets/sprites/PlayButton.png');
+        this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
+
 
         // player assets
-        this.load.image('head', 'assets/sprites/CircleToHit.png');
-        this.load.image('hand', 'assets/sprites/ObsticleX.png');
-        this.load.image('feet', 'assets/sprites/PlayerBlock.png');
+        this.load.image('head', 'assets/sprites/Head.png');
+        this.load.image('handclosed', 'assets/sprites/Hand-ClosedFingers.png');
+        this.load.image('handopen', 'assets/sprites/Hand-OpenFingers.png');
+        this.load.image('feet', 'assets/sprites/Shoe.png');
         this.load.image('joint', 'assets/sprites/Joints.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
 
@@ -53,10 +58,11 @@ class Menu extends Phaser.Scene {
         this.player = new Player(this);        
 
         // test hitbox to start game
-        this.startGameHitBox = this.matter.add.image(width / 4, height / 4, 'torso', null,
+        this.startGameHitBox = this.matter.add.image(width / 4, height / 4, 'playButton', null,
             { ignoreGravity: true, isSensor: true });
         this.startGameHitBox.setOrigin(0.5, 0.5);
-        this.startGameHitBox.setScale(4,2);
+        this.startGameHitBox.setScale(1,1);
+        this.startGameHitBox.setDepth(-1);
 
         // demo of callbacks
         this.player.dragCallbacks.dragStart.push(l => console.log('drag start'));
@@ -66,17 +72,37 @@ class Menu extends Phaser.Scene {
 
         this.player.dragOverlapTargets.push(this.startGameHitBox);
         this.player.dragCallbacks.overlapEnter.push((l, t) => {
-            if (t == this.startGameHitBox) {
+            if (t == this.startGameHitBox && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.startGameHitBox && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
                 this.sound.play('click', { volume: 3.0, detune: 600 });
             }
         });
         // start game when release limb over the startGameHitBox
         this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
-            if (overlapped.includes(this.startGameHitBox)) {
+            if (overlapped.includes(this.startGameHitBox) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
                 this.sound.play('click', { volume: 3.0, detune: 1200 });
                 this.time.delayedCall(250, () => this.startGame());
             }
         });
+
+        // create background
+        this.background = this.matter.add.image(0, 0, 'menuBackground', null, {ignoreGravity: true, isSensor: true});
+        this.background.setDepth(-2);
+        this.background.displayWidth = Game.config.width;
+        this.background.displayHeight = Game.config.height;
+        this.background.x = this.background.displayWidth / 2;
+        this.background.y = this.background.displayHeight / 2;
+
     }
 
     update(time, delta) {
