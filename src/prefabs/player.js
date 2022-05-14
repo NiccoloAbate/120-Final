@@ -113,19 +113,24 @@ class Player {
         this.currentMoveSound = undefined;
 
         this.mouseDragTarget = undefined;
-        // must be callbacks of type (limb, [body]) =>
+        // callbacks
         this.dragCallbacks = {
+            // (limb) =>
             dragStart: [],
+            // (limb, [body]) =>
             overlap: [],
+            // (limb, [body]) =>
             overlapEnter: [],
+            // (limb, [body]) =>
             overlapExit: [],
+            // (limb, [currentOverlappedObjects]) =>
             dragEnd: []
         }
         this.dragOverlappedObjects = [];
 
         this.scene.input.on('pointerup', (pointer) => {
             // call drag end callbacks
-            this.dragCallbacks.dragEnd.forEach(c => c(this.mouseDragTarget));
+            this.dragCallbacks.dragEnd.forEach(c => c(this.mouseDragTarget, this.dragOverlappedObjects));
             // empty the drag overlap objects
             this.dragOverlappedObjects = [];
             // reset mouse drag target
