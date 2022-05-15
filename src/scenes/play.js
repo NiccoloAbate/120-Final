@@ -44,6 +44,24 @@ class Play extends Phaser.Scene {
         this.playerInHole = false;
 
         
+        // info about the holes
+        this.holes = [
+            { 
+                duration: 10000,
+            },
+            { 
+                duration: 12000,
+            },
+            { 
+                duration: 12000,
+            },
+            { 
+                duration: 15000,
+            }
+        ]
+        this.holeID = 1;
+        this.lastHole = this.holes.length;
+
         this.generateWall();
 
 
@@ -75,22 +93,65 @@ class Play extends Phaser.Scene {
         this.background.x = this.background.displayWidth / 2;
         this.background.y = this.background.displayHeight / 2;
 
+        this.gameOver = false;
+
         //debug
         this.createDebugKeybinds();
     }
 
     update(time, delta) {
         
+        if (this.gameOver) {
+            return;
+        }
+
         if (this.wallTimer < 0) {
             if (this.wallTimer == -100000) {
 
             }
             else {
-                this.wallCheck();
-                this.wallTimer = -100000;
+                if (this.wallCheck()) {
+                    // check if the player won
+                    if (this.holeID >= this.lastHole) {
+                        this.wallTimer = -100000;
+                        this.playerInHole = false; // player is considered not inside the new hole
+                        this.setGameVictory();
+                        return;
+                    }
+
+                    // next hole
+                    ++this.holeID;
+                    this.playerInHole = false; // player is considered not inside the new hole
+
+                    // fade
+                    const fadeTime = 1000;
+                    this.oldWallImage = this.currentWallImage;
+                    this.oldWallOutline = this.currentWallOutline;
+                    this.tweens.add({
+                        targets: [this.oldWallImage, this.oldWallOutline],
+                        alpha: { from: 1.0, to: 0.0},
+                        duration: fadeTime,
+                        ease: 'Linear',
+                        repeat: 0 
+                    });
+                    this.time.delayedCall(fadeTime, () => {
+                        this.oldWallImage.destroy();
+                        this.oldWallOutline.destroy();
+                    });
+                    this.currentWallCollision.destroy();
+
+                    // generate next wall
+                    this.generateWall();
+                }
+                else {
+                    // player lost
+                    this.wallTimer = -100000;
+                    this.playerInHole = false; // player is considered not inside the new hole
+                }
             }
         }
         else {
+            // update wall time and wall timer bar
             this.wallTimer -= delta;
             this.wallTimeBar.scaleX = this.wallTimer / this.wallDuration;
         }
@@ -118,7 +179,11 @@ class Play extends Phaser.Scene {
     }
 
     generateWall() {
-        this.currentWallCollision = this.matter.add.image(0, 0, 'hole2', null, {ignoreGravity: true, isSensor: true});
+        this.currentHoleInfo = this.holes[this.holeID - 1];
+        let holeText = 'hole' + this.holeID;
+        let holeOutlineText = 'hole' + this.holeID + 'outline';
+
+        this.currentWallCollision = this.matter.add.image(0, 0, holeText, null, {ignoreGravity: true, isSensor: true});
         this.currentWallCollision.setDepth(-1);
         this.currentWallCollision.displayWidth = Game.config.width;
         this.currentWallCollision.displayHeight = Game.config.height;
@@ -126,21 +191,21 @@ class Play extends Phaser.Scene {
         this.currentWallCollision.y = this.currentWallCollision.displayHeight / 2;
         this.currentWallCollision.setAlpha(0);
 
-        this.currentWallImage = this.matter.add.image(0, 0, 'hole2', null, {ignoreGravity: true, isSensor: true});
+        this.currentWallImage = this.matter.add.image(0, 0, holeText, null, {ignoreGravity: true, isSensor: true});
         this.currentWallImage.setDepth(-1);
         this.currentWallImage.displayWidth = Game.config.width;
         this.currentWallImage.displayHeight = Game.config.height;
         this.currentWallImage.x = this.currentWallImage.displayWidth / 2;
         this.currentWallImage.y = this.currentWallImage.displayHeight;
 
-        this.currentWallOutline = this.matter.add.image(0, 0, 'hole2outline', null, {ignoreGravity: true, isSensor: true});
+        this.currentWallOutline = this.matter.add.image(0, 0, holeOutlineText, null, {ignoreGravity: true, isSensor: true});
         this.currentWallOutline.setDepth(-1);
         this.currentWallOutline.displayWidth = Game.config.width;
         this.currentWallOutline.displayHeight = Game.config.height;
         this.currentWallOutline.x = this.currentWallOutline.displayWidth / 2;
         this.currentWallOutline.y = this.currentWallOutline.displayHeight / 2;
 
-        this.wallDuration = 10000;
+        this.wallDuration = this.currentHoleInfo.duration;
         this.wallTimer = this.wallDuration;
         this.tweens.add({
             targets: this.currentWallImage,
@@ -154,16 +219,26 @@ class Play extends Phaser.Scene {
             ease: 'Quad.easeIn',
             repeat: 0 
         });
+        this.currentWallImage.setScale(0.00001, 0.00001);
+    }
+
+    destroyWall() {
+        this.currentWallCollision.destroy();
+        this.currentWallImage.destroy();
+        this.currentWallOutline.destroy();
     }
 
     wallCheck() {
         if (this.isPlayerInHole()) {
             console.log('you did it!');
             this.playSuccessSound();
+            return true;
         }
         else {
             console.log('you got owned by that there wall');
             this.playFailureSound();
+            this.setGameOver();
+            return false;
         }
     }
 
@@ -213,6 +288,18 @@ class Play extends Phaser.Scene {
         return nInHole / this.player.bodies.length;
     }
 
+    setGameOver() {
+        //this.scene.pause();
+        Game.scene.start('gameover');
+        this.gameOver = true;
+    }
+
+    setGameVictory() {
+        //this.scene.pause();
+        Game.scene.start('gamevictory');
+        this.gameOver = true;
+    }
+    
     defineKeys() {
     }
 

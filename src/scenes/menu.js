@@ -11,15 +11,27 @@ class Menu extends Phaser.Scene {
         
 
         // load images/tile sprites
-        this.load.image('hole1', 'assets/sprites/WallBackground-Hole1.png');
-        this.load.image('hole2', 'assets/sprites/WallBackground-Hole2.png');
-        this.load.image('hole2outline', 'assets/sprites/WallBackground-Hole2Outline.png');
+        this.load.image('hole6', 'assets/sprites/WallBackground-Hole1.png');
+        this.load.image('hole1', 'assets/sprites/WallBackground-Hole2.png');
+        this.load.image('hole1outline', 'assets/sprites/WallBackground-Hole2Outline.png');
+        this.load.image('hole2', 'assets/sprites/WallBackground-Hole3.png');
+        this.load.image('hole2outline', 'assets/sprites/WallBackground-Hole3Outline.png');
+        this.load.image('hole3', 'assets/sprites/WallBackground-Hole4.png');
+        this.load.image('hole3outline', 'assets/sprites/WallBackground-Hole4Outline.png');
+        this.load.image('hole4', 'assets/sprites/WallBackground-Hole5.png');
+        this.load.image('hole4outline', 'assets/sprites/WallBackground-Hole5Outline.png');
+
 
         this.load.image('background', 'assets/sprites/Background.png');
+
 
         // menu assets
         this.load.image('playButton', 'assets/sprites/PlayButton.png');
         this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
+
+        this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
+        this.load.image('grabMeBackground', 'assets/sprites/GrabMeBackground.png');
+        this.load.image('clickAndDragMe', 'assets/sprites/ClickAndDragMe.png');
 
 
         // player assets
@@ -58,7 +70,7 @@ class Menu extends Phaser.Scene {
         this.player = new Player(this);        
 
         // test hitbox to start game
-        this.startGameHitBox = this.matter.add.image(width / 4, height / 4, 'playButton', null,
+        this.startGameHitBox = this.matter.add.image(width / 5, height / 3, 'playButton', null,
             { ignoreGravity: true, isSensor: true });
         this.startGameHitBox.setOrigin(0.5, 0.5);
         this.startGameHitBox.setScale(1,1);
@@ -92,6 +104,14 @@ class Menu extends Phaser.Scene {
                 l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
                 this.sound.play('click', { volume: 3.0, detune: 1200 });
                 this.time.delayedCall(250, () => this.startGame());
+
+                this.tweens.add({
+                    targets: this.grabMeBackground,
+                    alpha: { from: 1.0, to: 0.0},
+                    duration: 250,
+                    ease: 'Linear',
+                    repeat: 0 
+                });
             }
         });
 
@@ -103,10 +123,44 @@ class Menu extends Phaser.Scene {
         this.background.x = this.background.displayWidth / 2;
         this.background.y = this.background.displayHeight / 2;
 
+        // create background
+        this.grabMeBackground = this.matter.add.image(0, 0, 'grabMeBackground', null, {ignoreGravity: true, isSensor: true});
+        this.grabMeBackground.setDepth(-2);
+        this.grabMeBackground.displayWidth = Game.config.width;
+        this.grabMeBackground.displayHeight = Game.config.height;
+        this.grabMeBackground.x = this.grabMeBackground.displayWidth / 2;
+        this.grabMeBackground.y = this.grabMeBackground.displayHeight / 2;
+
+        this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
+        this.clickAndDragMe.setDepth(1);
+        this.firstClickAndDragDone = false;
+
+        this.player.dragCallbacks.dragStart.push((l, t) => {
+            if (this.firstClickAndDragDone) {
+                return;
+            }
+            else {
+                this.firstClickAndDragDone = true;
+            }
+
+            if (l == this.player.limbs[this.player.leftArmID]) {
+                this.tweens.add({
+                    targets: this.clickAndDragMe,
+                    alpha: { from: 1.0, to: 0.0},
+                    duration: 1000,
+                    ease: 'Linear',
+                    repeat: 0 
+                });
+            }
+        });
+
     }
 
     update(time, delta) {
         this.player.update();
+
+        this.clickAndDragMe.x = this.player.limbs[this.player.leftArmID].x;
+        this.clickAndDragMe.y = this.player.limbs[this.player.leftArmID].y - (this.clickAndDragMe.displayHeight - 80);
     }
 
     startGame() {

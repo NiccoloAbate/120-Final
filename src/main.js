@@ -9,10 +9,12 @@ let config = {
                 y: 0
             },
             
+            /*
             debug: {
                 showBody: true,
                 showStaticBody: true
             }
+            */
             
         }
     },
@@ -21,7 +23,7 @@ let config = {
     //height: window.innerHeight * window.devicePixelRatio,
     width: 1600,
     height: 900,
-    scene: [Menu, Play]
+    scene: [Menu, Play, GameOver, GameVictory]
 }
 
 let borderUISize = config.height / 15;

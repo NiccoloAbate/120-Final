@@ -20,7 +20,7 @@ class Player {
         this.torso.setOrigin(0.5, 0.5);
         this.torso.setScale(0.75, 0.75);
         this.torso.setFixedRotation();
-        this.torso.setMass(20000);
+        this.torso.setMass(40000);
 
         this.bodies.push(this.torso);
 
@@ -60,7 +60,7 @@ class Player {
             l.setOrigin(0.5, 0.5);
             l.setScale(0.6, 0.6);
             l.setFixedRotation();
-            l.setMass(5000);
+            l.setMass(10000);
             l.limbType = limbTypes[n];
 
             this.bodies.push(l);

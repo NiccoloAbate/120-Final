@@ -1,14 +1,15 @@
-class GameOver extends Phaser.Scene {
+// Victory scene
+class GameVictory extends Phaser.Scene {
     constructor() {
-        super("gameover");
+        super("gamevictory");
     }
 
     preload() {
-        this.load.image('gameOverScreen', 'assets/sprites/GameOverScreen.png');
+        this.load.image('gameVictoryScreen', 'assets/sprites/GameWinScreen.png');
     }
 
     create() {
-        this.background = this.matter.add.image(0, 0, 'gameOverScreen', null, {ignoreGravity: true, isSensor: true});
+        this.background = this.matter.add.image(0, 0, 'gameVictoryScreen', null, {ignoreGravity: true, isSensor: true});
         this.background.displayWidth = Game.config.width;
         this.background.displayHeight = Game.config.height;
         this.background.x = this.background.displayWidth / 2;
