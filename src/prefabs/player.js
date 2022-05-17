@@ -198,7 +198,7 @@ class Player {
 // player States, just for audio right now
 
 const moveThresh = 0.005;
-const moveVolumeMult = 1.5;
+const moveVolumeMult = 2.0;
 function moveValToVolume(v) {
     return Math.sqrt(v) * moveVolumeMult;
 };
