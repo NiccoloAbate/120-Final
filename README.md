@@ -2,4 +2,4 @@
 
 
 # Attributions
-## FSM StateMachine.js from Nathan Altice, adapted from mkelly.me/blog/phaser-finite-state-machine
+FSM StateMachine.js from Nathan Altice, adapted from mkelly.me/blog/phaser-finite-state-machine
