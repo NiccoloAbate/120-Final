@@ -107,6 +107,8 @@ class Play extends Phaser.Scene {
 
     update(time, delta) {
         
+        this.player.update(time, delta); // update even if game is over
+
         if (this.gameOver) {
             return;
         }
@@ -167,8 +169,6 @@ class Play extends Phaser.Scene {
             this.wallTimer -= delta;
             this.wallTimeBar.scaleX = this.wallTimer / this.wallDuration;
         }
-
-        this.player.update();
 
         this.percentInHole = this.percentPlayerInHole(true);
         if (this.percentInHole == 1) {
@@ -298,7 +298,7 @@ class Play extends Phaser.Scene {
                 }
                 else {
                     // not in hole
-                    b.tint = 0xff0000;
+                    b.tint = 0x000000;
                     console.log('tint!'); // tint doesn't work... but something like this!
                 }
             }
