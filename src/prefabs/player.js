@@ -93,7 +93,7 @@ class Player {
 
                 // dispay line
                 let line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0x0000ff);
-                l.lineWidth = 25;
+                line.lineWidth = 5;
                 line.h1 = prev;
                 line.h2 = j;
                 line.setOrigin(0.0, 0.0);
@@ -105,7 +105,7 @@ class Player {
 
             // dispay line
             let line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0x0000ff);
-            l.lineWidth = 25;
+            line.lineWidth = 5;
             line.h1 = prev;
             line.h2 = l;
             line.setOrigin(0.0, 0.0);
