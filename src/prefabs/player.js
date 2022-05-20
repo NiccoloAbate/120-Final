@@ -21,6 +21,7 @@ class Player {
         this.torso.setScale(0.75, 0.75);
         this.torso.setFixedRotation();
         this.torso.setMass(40000);
+        this.torso.setDepth(1);
 
         this.bodies.push(this.torso);
 
@@ -50,6 +51,7 @@ class Player {
         this.limbs = new Array(this.nLimbs);
         this.limbJoints = new Array(this.nLimbs);
         // create each limb and corresponding joints
+        this.limbLines = new Array();
         for (let n = 0; n < this.nLimbs; ++n) {
             let lPos = limbPositions[n];
             // create limb
@@ -61,6 +63,7 @@ class Player {
             l.setScale(0.6, 0.6);
             l.setFixedRotation();
             l.setMass(10000);
+            l.setDepth(1);
             l.limbType = limbTypes[n];
 
             this.bodies.push(l);
@@ -81,14 +84,32 @@ class Player {
                 let j = lj[i];
 
                 j.setScale(2, 2);
+                j.setOrigin(0.5, 0.5);
+                j.setDepth(1);
                 j.limbType = 'joint';
                 this.scene.matter.add.joint(prev, j, (i === 0) ? 90 : 55, 0.7);
 
                 this.bodies.push(j);
 
+                // dispay line
+                let line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0x0000ff);
+                l.lineWidth = 25;
+                line.h1 = prev;
+                line.h2 = j;
+                line.setOrigin(0.0, 0.0);
+                this.limbLines.push(line);
+
                 prev = j;
             }
             this.scene.matter.add.joint(prev, l, 90, 1);
+
+            // dispay line
+            let line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0x0000ff);
+            l.lineWidth = 25;
+            line.h1 = prev;
+            line.h2 = l;
+            line.setOrigin(0.0, 0.0);
+            this.limbLines.push(line);
         }
 
         console.log(this.limbs);
@@ -149,6 +170,9 @@ class Player {
         
         // add targets into this if you want to check them for drag overlapping
         this.dragOverlapTargets = [];
+
+        // set lines visible or invisible
+        this.limbLines.forEach(l => l.setVisible(true));
     }
 
     update() {
@@ -177,6 +201,11 @@ class Player {
                     }
                 }
             }
+        }
+
+        // update display lines
+        for (let l of this.limbLines) {
+            l.setTo(l.h1.x, l.h1.y, l.h2.x, l.h2.y);
         }
     }
 
