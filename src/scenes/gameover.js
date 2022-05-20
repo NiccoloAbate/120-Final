@@ -4,7 +4,7 @@ class GameOver extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('gameOverScreen', 'assets/sprites/GameOverScreen.png');
+        this.load.image('gameOverScreen', 'assets/sprites/GameOver.png');
     }
 
     create() {

@@ -183,7 +183,7 @@ class Player {
     movementValue() {
         let velocities = new Array();
 
-        const maxV = 10;
+        const maxV = 15;
         for (let b of this.bodies) {
             velocities.push(vecLenSqrd(b.body.velocity));
         }
@@ -198,7 +198,7 @@ class Player {
 // player States, just for audio right now
 
 const moveThresh = 0.005;
-const moveVolumeMult = 2.0;
+const moveVolumeMult = 2.5;
 function moveValToVolume(v) {
     return Math.sqrt(v) * moveVolumeMult;
 };

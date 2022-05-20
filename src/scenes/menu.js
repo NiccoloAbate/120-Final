@@ -33,6 +33,8 @@ class Menu extends Phaser.Scene {
         this.load.image('grabMeBackground', 'assets/sprites/GrabMeBackground.png');
         this.load.image('clickAndDragMe', 'assets/sprites/ClickAndDragMe.png');
 
+        this.load.image('cake', 'assets/sprites/cake.png');
+
 
         // player assets
         this.load.image('head', 'assets/sprites/Head.png');
@@ -83,6 +85,7 @@ class Menu extends Phaser.Scene {
         this.player.dragCallbacks.overlapExit.push((l, t) => console.log('drag overlap exit'));
 
         this.player.dragOverlapTargets.push(this.startGameHitBox);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
         this.player.dragCallbacks.overlapEnter.push((l, t) => {
             if (t == this.startGameHitBox && l.limbType == 'hand') {
                 l.setTexture('handopen');
@@ -131,19 +134,21 @@ class Menu extends Phaser.Scene {
         this.grabMeBackground.x = this.grabMeBackground.displayWidth / 2;
         this.grabMeBackground.y = this.grabMeBackground.displayHeight / 2;
 
+        // click and drag me message that follows hand
         this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
         this.clickAndDragMe.setDepth(1);
         this.firstClickAndDragDone = false;
 
+        // drag me message callback
         this.player.dragCallbacks.dragStart.push((l, t) => {
-            if (this.firstClickAndDragDone) {
-                return;
-            }
-            else {
-                this.firstClickAndDragDone = true;
-            }
-
             if (l == this.player.limbs[this.player.leftArmID]) {
+                if (this.firstClickAndDragDone) {
+                    return;
+                }
+                else {
+                    this.firstClickAndDragDone = true;
+                }
+
                 this.tweens.add({
                     targets: this.clickAndDragMe,
                     alpha: { from: 1.0, to: 0.0},
@@ -154,6 +159,34 @@ class Menu extends Phaser.Scene {
             }
         });
 
+        this.cake = this.matter.add.image(3 * (width / 4), height / 3, 'cake', null, {ignoreGravity: true, isSensor: true});
+        this.cake.setDepth(-1);
+        this.player.dragOverlapTargets.push(this.cake);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
+        this.player.dragCallbacks.overlapEnter.push((l, t) => {
+            if (t == this.cake && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.cake && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        // do something when you grab the cake!
+        this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+            if (overlapped.includes(this.cake) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 1200 });
+                this.player.dragOverlapTargets.splice(this.player.dragOverlapTargets.indexOf(this.cake));
+                this.cake.destroy(); // placeholder for something more exciting happening
+            }
+        });
     }
 
     update(time, delta) {

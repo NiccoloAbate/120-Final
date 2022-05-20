@@ -170,7 +170,7 @@ class Play extends Phaser.Scene {
 
         this.player.update();
 
-        this.percentInHole = this.percentPlayerInHole();
+        this.percentInHole = this.percentPlayerInHole(true);
         if (this.percentInHole == 1) {
             // player fully inside
             // if this remains true 3 seconds
@@ -277,7 +277,7 @@ class Play extends Phaser.Scene {
         return true;
     }
 
-    percentPlayerInHole() {
+    percentPlayerInHole(tintLimbs = false) {
         let Wall = this.currentWallCollision;
 
         let nInHole = 0;
@@ -292,7 +292,14 @@ class Play extends Phaser.Scene {
                       Math.floor(yCheck),
                       Wall.texture.key
                     ) === 0)) {
+                    // in hole
                     ++nInHole;
+                    b.tint = 0xffffff; // tint doesn't work... but something like this!
+                }
+                else {
+                    // not in hole
+                    b.tint = 0xff0000;
+                    console.log('tint!'); // tint doesn't work... but something like this!
                 }
             }
         }
