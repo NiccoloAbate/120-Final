@@ -187,6 +187,9 @@ class Menu extends Phaser.Scene {
                 this.cake.destroy(); // placeholder for something more exciting happening
             }
         });
+
+
+        
     }
 
     update(time, delta) {

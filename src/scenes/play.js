@@ -63,7 +63,7 @@ class Play extends Phaser.Scene {
         this.holeID = 1;
 
         // the hole # to start the scene
-        this.sceneHole = 2;
+        this.sceneHole = 1;
 
         // the last hole to win
         this.lastHole = this.holes.length;
@@ -118,7 +118,11 @@ class Play extends Phaser.Scene {
             else {
                 if (this.wallCheck()) {
                     // check if the player reached the scene 
-                    
+                    if (this.holeID == this.sceneHole) {
+                        this.scene.pause();
+                        this.playerInHole = false; // player is considered not inside the new hole
+                        this.setNextScene();
+                    }
                     // check if the player won
                     if (this.holeID >= this.lastHole) {
                         this.wallTimer = -100000;
@@ -129,10 +133,6 @@ class Play extends Phaser.Scene {
 
                     // next hole
                     ++this.holeID;
-                    if (this.holeID == this.sceneHole) {
-                        this.playerInHole = false; // player is considered not inside the new hole
-                        this.setNextScene();
-                    }
                     this.playerInHole = false; // player is considered not inside the new hole
 
                     // fade
@@ -225,10 +225,10 @@ class Play extends Phaser.Scene {
             //displayHeight: { from: 0.0, to: this.currentWallImage.displayHeight },
             scaleX: { from: 0.00001, to: this.currentWallImage.scaleX},
             scaleY: { from: 0.00001, to: this.currentWallImage.scaleY},
-            y: { from: this.currentWallImage.displayHeight - 100, to: this.currentWallImage.displayHeight / 2 },
+            y: { from: this.currentWallImage.displayHeight - 210, to: this.currentWallImage.displayHeight / 2 },
             
             duration: this.wallDuration,
-            ease: 'Quad.easeIn',
+            ease: 'Expo.easeIn',
             repeat: 0 
         });
         this.currentWallImage.setScale(0.00001, 0.00001);
@@ -320,7 +320,6 @@ class Play extends Phaser.Scene {
     }
 
     setNextScene() {
-        this.scene.pause();
         Game.scene.start('gamescene');
         //this.gameOver = true;
     }
