@@ -47,7 +47,7 @@ class Play extends Phaser.Scene {
         // info about the holes
         this.holes = [
             { 
-                duration: 10000,
+                duration: 6000,
             },
             { 
                 duration: 12000,
@@ -58,8 +58,14 @@ class Play extends Phaser.Scene {
             { 
                 duration: 15000,
             }
+            
         ]
         this.holeID = 1;
+
+        // the hole # to start the scene
+        this.sceneHole = 2;
+
+        // the last hole to win
         this.lastHole = this.holes.length;
 
         this.generateWall();
@@ -111,6 +117,8 @@ class Play extends Phaser.Scene {
             }
             else {
                 if (this.wallCheck()) {
+                    // check if the player reached the scene 
+                    
                     // check if the player won
                     if (this.holeID >= this.lastHole) {
                         this.wallTimer = -100000;
@@ -121,6 +129,10 @@ class Play extends Phaser.Scene {
 
                     // next hole
                     ++this.holeID;
+                    if (this.holeID == this.sceneHole) {
+                        this.playerInHole = false; // player is considered not inside the new hole
+                        this.setNextScene();
+                    }
                     this.playerInHole = false; // player is considered not inside the new hole
 
                     // fade
@@ -298,6 +310,12 @@ class Play extends Phaser.Scene {
         //this.scene.pause();
         Game.scene.start('gamevictory');
         this.gameOver = true;
+    }
+
+    setNextScene() {
+        this.scene.pause();
+        Game.scene.start('gamescene');
+        //this.gameOver = true;
     }
     
     defineKeys() {

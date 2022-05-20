@@ -23,7 +23,7 @@ let config = {
     //height: window.innerHeight * window.devicePixelRatio,
     width: 1600,
     height: 900,
-    scene: [Menu, Play, GameOver, GameVictory]
+    scene: [Menu, Play, GameOver, GameVictory, GameScene]
 }
 
 let borderUISize = config.height / 15;
