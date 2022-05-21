@@ -54,6 +54,9 @@ class Menu extends Phaser.Scene {
         // misc sfx
         this.load.audio('click', 'assets/sfx/Click 01.wav');
 
+        // music
+        Audio.preloadMulti(this, 'Track1', Track1StemFileNames, Track1StemNames);
+
         // menu text config
 
         // show loading text

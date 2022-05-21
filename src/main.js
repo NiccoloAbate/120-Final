@@ -32,6 +32,8 @@ let borderPadding = borderUISize / 3;
 let Game = new Phaser.Game(config);
 
 let Audio = new AudioManager;
+let Track1StemNames = ['Normal', 'Filtered'];
+let Track1StemFileNames = ['assets/music/Track 01 - Normal.mp3', 'assets/music/Track 01 - Filtered.mp3'];
 
 let playerMoveStartSounds = 5;
 let playerMoveContSounds = 6;

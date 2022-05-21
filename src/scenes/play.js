@@ -99,6 +99,12 @@ class Play extends Phaser.Scene {
         this.background.x = this.background.displayWidth / 2;
         this.background.y = this.background.displayHeight / 2;
 
+        // music
+        this.globalMusicVolume = 0.25;
+        this.Track1 = Audio.addMulti(this, 'Track1');
+        this.Track1.setGlobalConfig({loop: true, volume: this.globalMusicVolume});
+        this.Track1.play();
+
         this.gameOver = false;
 
         //debug
@@ -188,6 +194,11 @@ class Play extends Phaser.Scene {
 
         let formatPercentText = (p) => parseFloat(p * 100).toFixed(0) + "%";
         this.percentInText.text = formatPercentText(this.percentInHole);
+
+        let FilteredVol = this.globalMusicVolume * (this.wallTimer / this.currentHoleInfo.duration);
+        let NormalVol = this.globalMusicVolume - FilteredVol;
+        this.Track1.setConfig('Normal', {volume: NormalVol});
+        this.Track1.setConfig('Filtered', {volume: FilteredVol});
     }
 
     generateWall() {
