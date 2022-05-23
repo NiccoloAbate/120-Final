@@ -112,7 +112,6 @@ class Player {
             this.limbLines.push(line);
         }
 
-        console.log(this.limbs);
         this.limbs[this.rightArmID].flipX = true;
         this.limbs[this.rightFootID].flipX = true;
 

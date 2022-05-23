@@ -11,7 +11,7 @@ class Menu extends Phaser.Scene {
         
 
         // load images/tile sprites
-        this.load.image('hole6', 'assets/sprites/WallBackground-Hole1.png');
+        //this.load.image('hole6', 'assets/sprites/WallBackground-Hole1.png');
         this.load.image('hole1', 'assets/sprites/WallBackground-Hole2.png');
         this.load.image('hole1outline', 'assets/sprites/WallBackground-Hole2Outline.png');
         this.load.image('hole2', 'assets/sprites/WallBackground-Hole3.png');
@@ -20,6 +20,16 @@ class Menu extends Phaser.Scene {
         this.load.image('hole3outline', 'assets/sprites/WallBackground-Hole4Outline.png');
         this.load.image('hole4', 'assets/sprites/WallBackground-Hole5.png');
         this.load.image('hole4outline', 'assets/sprites/WallBackground-Hole5Outline.png');
+        this.load.image('hole5', 'assets/sprites/WallBackground-Hole6.png');
+        this.load.image('hole5outline', 'assets/sprites/WallBackground-Hole6Outline.png');
+        this.load.image('hole6', 'assets/sprites/WallBackground-Hole7.png');
+        this.load.image('hole6outline', 'assets/sprites/WallBackground-Hole7Outline.png');
+        this.load.image('hole7', 'assets/sprites/WallBackground-Hole8.png');
+        this.load.image('hole7outline', 'assets/sprites/WallBackground-Hole8Outline.png');
+        this.load.image('hole8', 'assets/sprites/WallBackground-Hole9.png');
+        this.load.image('hole8outline', 'assets/sprites/WallBackground-Hole9Outline.png');
+        this.load.image('hole9', 'assets/sprites/WallBackground-Hole10.png');
+        this.load.image('hole9outline', 'assets/sprites/WallBackground-Hole10Outline.png');
 
 
         this.load.image('background', 'assets/sprites/Background.png');
@@ -27,6 +37,8 @@ class Menu extends Phaser.Scene {
 
         // menu assets
         this.load.image('playButton', 'assets/sprites/PlayButton.png');
+        this.load.image('quitButton', 'assets/sprites/QuitButton.png');
+        this.load.image('retryButton', 'assets/sprites/RetryButton.png');
         this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
 
         this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
@@ -140,16 +152,17 @@ class Menu extends Phaser.Scene {
         // click and drag me message that follows hand
         this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
         this.clickAndDragMe.setDepth(1);
-        this.firstClickAndDragDone = false;
+        this.timeSinceGrabMe = 100 * UpdateTime.sRatio;
+        this.timeBetweenGrabMeMessages = 10 * UpdateTime.sRatio;
 
         // drag me message callback
         this.player.dragCallbacks.dragStart.push((l, t) => {
             if (l == this.player.limbs[this.player.leftArmID]) {
-                if (this.firstClickAndDragDone) {
+                if (this.timeSinceGrabMe < this.timeBetweenGrabMeMessages) {
                     return;
                 }
                 else {
-                    this.firstClickAndDragDone = true;
+                    this.timeSinceGrabMe = 0;
                 }
 
                 this.tweens.add({
@@ -192,7 +205,7 @@ class Menu extends Phaser.Scene {
         });
 
 
-        
+        holeStartID = 1; // reset checkpoint
     }
 
     update(time, delta) {
@@ -200,6 +213,17 @@ class Menu extends Phaser.Scene {
 
         this.clickAndDragMe.x = this.player.limbs[this.player.leftArmID].x;
         this.clickAndDragMe.y = this.player.limbs[this.player.leftArmID].y - (this.clickAndDragMe.displayHeight - 80);
+        this.timeSinceGrabMe += delta;
+        if (this.timeSinceGrabMe > this.timeBetweenGrabMeMessages && this.clickAndDragMe.alpha == 0) {
+            // message reappears after a little while
+            this.tweens.add({
+                targets: this.clickAndDragMe,
+                alpha: { from: 0.0000001, to: 1.0},
+                duration: 500,
+                ease: 'Linear',
+                repeat: 0 
+            });
+        }
     }
 
     startGame() {

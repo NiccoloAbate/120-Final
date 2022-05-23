@@ -47,23 +47,50 @@ class Play extends Phaser.Scene {
         // info about the holes
         this.holes = [
             { 
+                // # 1 circle
                 duration: 6000,
             },
             { 
+                // # 2 triangle
                 duration: 12000,
             },
             { 
+                // # 3 slanted oval
                 duration: 12000,
             },
             { 
+                // # 4 star
                 duration: 15000,
+            },
+            { 
+                // # 5 horizontal line
+                duration: 15000,
+            },
+            { 
+                // # 6 vertical line
+                duration: 20000,
+            },
+            { 
+                // # 7 thin outline
+                duration: 25000,
+            },
+            { 
+                // # 8 L in bottom left corner
+                duration: 20000,
+            },
+            { 
+                // # 9 arrow pointing to top right
+                duration: 28000,
             }
-            
         ]
-        this.holeID = 1;
+        this.holeID = holeStartID;
 
         // the hole # to start the scene
-        this.sceneHole = 1;
+        this.sceneHole = 4;
+
+        if (this.holeID > this.sceneHole) {
+            this.setNextScene(); // if loading from checkpoint, start with the mid scene
+        }
 
         // the last hole to win
         this.lastHole = this.holes.length;
@@ -100,7 +127,7 @@ class Play extends Phaser.Scene {
         this.background.y = this.background.displayHeight / 2;
 
         // music
-        this.globalMusicVolume = 0.25;
+        this.globalMusicVolume = 0.15;
         this.Track1 = Audio.addMulti(this, 'Track1');
         this.Track1.setGlobalConfig({loop: true, volume: this.globalMusicVolume});
         this.Track1.play();
@@ -120,7 +147,7 @@ class Play extends Phaser.Scene {
         }
 
         if (this.wallTimer < 0) {
-            if (this.wallTimer == -100000) {
+            if (this.wallTimer == 10000000) {
 
             }
             else {
@@ -165,7 +192,7 @@ class Play extends Phaser.Scene {
                 }
                 else {
                     // player lost
-                    this.wallTimer = -100000;
+                    this.wallTimer = 10000000;
                     this.playerInHole = false; // player is considered not inside the new hole
                 }
             }
@@ -195,7 +222,7 @@ class Play extends Phaser.Scene {
         let formatPercentText = (p) => parseFloat(p * 100).toFixed(0) + "%";
         this.percentInText.text = formatPercentText(this.percentInHole);
 
-        let FilteredVol = this.globalMusicVolume * (this.wallTimer / this.currentHoleInfo.duration);
+        let FilteredVol = this.globalMusicVolume * clamp(this.wallTimer / this.currentHoleInfo.duration, 0, 1);
         let NormalVol = this.globalMusicVolume - FilteredVol;
         this.Track1.setConfig('Normal', {volume: NormalVol});
         this.Track1.setConfig('Filtered', {volume: FilteredVol});
@@ -322,6 +349,84 @@ class Play extends Phaser.Scene {
         //this.scene.pause();
         Game.scene.start('gameover');
         this.gameOver = true;
+
+        let width = Game.config.width;
+        let height = Game.config.height;
+
+        // test hitbox to start game
+        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'quitButton', null,
+            { ignoreGravity: true, isSensor: true });
+        this.quitButton.setOrigin(0.5, 0.5);
+        this.quitButton.setScale(1,1);
+        this.quitButton.setDepth(-1);
+
+        this.player.dragOverlapTargets.push(this.quitButton);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
+        this.player.dragCallbacks.overlapEnter.push((l, t) => {
+            if (t == this.quitButton && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.quitButton && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        // start game when release limb over the quitButton
+        this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+            if (overlapped.includes(this.quitButton) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 1200 });
+                this.time.delayedCall(250, () => {
+                    this.Track1.destroy();
+                    Game.scene.start("menu");
+                    Game.scene.stop("gameover");
+                    this.scene.stop();
+                });
+            }
+        });
+
+        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 3) * 2, 'retryButton', null,
+            { ignoreGravity: true, isSensor: true });
+        this.retryButton.setOrigin(0.5, 0.5);
+        this.retryButton.setScale(1,1);
+        this.retryButton.setDepth(-1);
+
+        this.player.dragOverlapTargets.push(this.retryButton);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
+        this.player.dragCallbacks.overlapEnter.push((l, t) => {
+            if (t == this.retryButton && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.retryButton && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        // start game when release limb over the retryButton
+        this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+            if (overlapped.includes(this.retryButton) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                this.sound.play('click', { volume: 3.0, detune: 1200 });
+                this.time.delayedCall(250, () => {
+                    this.Track1.destroy();
+                    Game.scene.stop("gameover");
+                    this.scene.restart();
+                    console.log("still going?");
+                });
+            }
+        });
     }
 
     setGameVictory() {
@@ -348,6 +453,34 @@ class Play extends Phaser.Scene {
     createDebugKeybinds() {
         this.input.keyboard.on('keydown-R', (event) => {
             console.log("yeahsss");
+        });
+
+        // causes an issue because of wall animation tweens
+        this.input.keyboard.on('keydown-Q', (event) => {
+            console.log("right");
+            // next hole
+            ++this.holeID;
+            this.playerInHole = false; // player is considered not inside the new hole
+
+            // fade
+            const fadeTime = 1000;
+            this.oldWallImage = this.currentWallImage;
+            this.oldWallOutline = this.currentWallOutline;
+            this.tweens.add({
+                targets: [this.oldWallImage, this.oldWallOutline],
+                alpha: { from: 1.0, to: 0.0},
+                duration: fadeTime,
+                ease: 'Linear',
+                repeat: 0 
+            });
+            this.time.delayedCall(fadeTime, () => {
+                this.oldWallImage.destroy();
+                this.oldWallOutline.destroy();
+            });
+            this.currentWallCollision.destroy();
+
+            // generate next wall
+            this.generateWall();
         });
     }
 }

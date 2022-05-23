@@ -38,4 +38,7 @@ let Track1StemFileNames = ['assets/music/Track 01 - Normal.mp3', 'assets/music/T
 let playerMoveStartSounds = 5;
 let playerMoveContSounds = 6;
 
+// global variable to keep track of checkpoint outside of play scene
+let holeStartID = 1;
+
 // reserve keyboard vars
