@@ -41,4 +41,5 @@ let playerMoveContSounds = 6;
 // global variable to keep track of checkpoint outside of play scene
 let holeStartID = 1;
 
-// reserve keyboard vars
+// global const for 0 scale, because you can't actually have 0 scale
+const ZEROSCALE = 0.000001;

@@ -288,6 +288,7 @@ class Play extends Phaser.Scene {
             console.log('you got owned by that there wall');
             this.playFailureSound();
             this.setGameOver();
+            this.spawnHitSprites();
             return false;
         }
     }
@@ -306,7 +307,11 @@ class Play extends Phaser.Scene {
                       Math.floor(yCheck),
                       Wall.texture.key
                     ) === 255)) {
+                    b.insideHole = false;
                     return false;
+                }
+                else {
+                    b.insideHole = true;
                 }
             }
         }
@@ -333,9 +338,11 @@ class Play extends Phaser.Scene {
                     // in hole
                     ++nInHole;
                     b.tint = 0xffffff; // tint doesn't work... but something like this!
+                    b.insideHole = true;
                 }
                 else {
                     // not in hole
+                    b.insideHole = false;
                     b.tint = 0x000000;
                     console.log('tint!'); // tint doesn't work... but something like this!
                 }
@@ -448,6 +455,33 @@ class Play extends Phaser.Scene {
     }
     playFailureSound() {
         this.sound.play('ding', { volume: 0.2, detune: -1200 });
+    }
+
+    spawnHitSprites() {
+        for (let b of this.player.bodies) {
+            if (!b.insideHole) {
+                let tex = 'hit0';
+                let hitSprite = this.matter.add.image(b.x, b.y, tex, null,
+                    { isSensor: true, ignoreGravity: true });
+                let scale = (b.width / hitSprite.displayWidth) * 1.15;
+                hitSprite.setScale(scale, scale);
+                hitSprite.setDepth(1);
+
+                let fadeTime = 1000 + getRandomIntInclusive(-100, 100);
+                this.tweens.add({
+                    targets: hitSprite,
+                    alpha: { from: 1.0, to: 0.0 },
+                    scaleX: { from: scale, to: ZEROSCALE },
+                    scaleY: { from: scale, to: ZEROSCALE },
+                    duration: fadeTime,
+                    ease: 'Linear',
+                    repeat: 0 
+                });
+                this.time.delayedCall(fadeTime + 100, () => {
+                    hitSprite.destroy();
+                });
+            }
+        }
     }
 
     createDebugKeybinds() {

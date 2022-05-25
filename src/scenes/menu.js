@@ -34,6 +34,9 @@ class Menu extends Phaser.Scene {
 
         this.load.image('background', 'assets/sprites/Background.png');
 
+        this.load.image('hit0', 'assets/sprites/CurvedStyleSplat.png');
+        this.load.image('hit1', 'assets/sprites/SpikeStyleSplat.png');
+
 
         // menu assets
         this.load.image('playButton', 'assets/sprites/PlayButton.png');
@@ -50,8 +53,8 @@ class Menu extends Phaser.Scene {
 
         // player assets
         this.load.image('head', 'assets/sprites/Head.png');
-        this.load.image('handclosed', 'assets/sprites/Hand-ClosedFingers.png');
-        this.load.image('handopen', 'assets/sprites/Hand-OpenFingers.png');
+        this.load.image('handclosed', 'assets/sprites/Hand-CartoonyGlove-Orange-Closed.png');
+        this.load.image('handopen', 'assets/sprites/Hand-CartoonyGlove-Orange-Open.png');
         this.load.image('feet', 'assets/sprites/Shoe.png');
         this.load.image('joint', 'assets/sprites/Joints.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
@@ -213,6 +216,8 @@ class Menu extends Phaser.Scene {
 
         this.clickAndDragMe.x = this.player.limbs[this.player.leftArmID].x;
         this.clickAndDragMe.y = this.player.limbs[this.player.leftArmID].y - (this.clickAndDragMe.displayHeight - 80);
+
+        // possibly add a clause to reset time to zero is dragging
         this.timeSinceGrabMe += delta;
         if (this.timeSinceGrabMe > this.timeBetweenGrabMeMessages && this.clickAndDragMe.alpha == 0) {
             // message reappears after a little while

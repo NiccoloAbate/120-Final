@@ -47,6 +47,7 @@ class Player {
         // image for each limb
         let limbTypes = ['head', 'hand', 'feet', 'feet', 'hand'];
         let limbImage = ['head', 'handclosed', 'feet', 'feet', 'handclosed'];
+        let limbScales = [0.65, 0.8, 0.6, 0.6, 0.8];
 
         this.limbs = new Array(this.nLimbs);
         this.limbJoints = new Array(this.nLimbs);
@@ -60,7 +61,7 @@ class Player {
             let l = this.limbs[n];
 
             l.setOrigin(0.5, 0.5);
-            l.setScale(0.6, 0.6);
+            l.setScale(limbScales[n], limbScales[n]);
             l.setFixedRotation();
             l.setMass(10000);
             l.setDepth(1);
