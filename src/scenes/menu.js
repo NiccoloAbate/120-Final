@@ -56,7 +56,9 @@ class Menu extends Phaser.Scene {
         this.load.image('handclosed', 'assets/sprites/Hand-CartoonyGlove-Orange-Closed.png');
         this.load.image('handopen', 'assets/sprites/Hand-CartoonyGlove-Orange-Open.png');
         this.load.image('feet', 'assets/sprites/Shoe.png');
-        this.load.image('joint', 'assets/sprites/Joints.png');
+        this.load.image('jointBlue', 'assets/sprites/Joints.png');
+        this.load.image('jointOrange', 'assets/sprites/JointsOrange.png');
+        this.load.image('jointRed', 'assets/sprites/JointsRed.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
 
         for (let i = 1; i <= playerMoveStartSounds; ++i) {

@@ -80,8 +80,26 @@ class Player {
                 let x = this.torso.x + ((i / nJoints) * posDiff.x);
                 let y = this.torso.y + ((i / nJoints) * posDiff.y);
                 
-                lj[i] = this.scene.matter.add.image(x, y, 'joint', null,
+
+                // display joints
+                // change joint colors depending on limb
+                // n = 0 == neck
+                // n = 1 or 4 == arms
+                // n = 2 or 3 == legs
+                if( n == 1 || n == 4){
+                    lj[i] = this.scene.matter.add.image(x, y, 'jointOrange', null,
                     { shape: 'circle', mass: 5, ignoreGravity: true });
+                    
+                }else if(n == 0){
+                    lj[i] = this.scene.matter.add.image(x, y, 'jointRed', null,
+                    { shape: 'circle', mass: 5, ignoreGravity: true });
+                    
+                }else{
+                    lj[i] = this.scene.matter.add.image(x, y, 'jointBlue', null,
+                    { shape: 'circle', mass: 5, ignoreGravity: true });
+                    
+                }
+                
                 let j = lj[i];
 
                 j.setScale(2, 2);
@@ -93,7 +111,19 @@ class Player {
                 this.bodies.push(j);
 
                 // dispay line
-                let line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0x0000ff);
+                // change line colors depending on limb
+                // n = 0 == neck
+                // n = 1 or 4 == arms
+                // n = 2 or 3 == legs
+                let line;
+                if( n == 1 || n == 4){
+                    line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0xfcac04);
+                }else if(n == 0){
+                    line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0xf60e0e);
+                }else{
+                    line = this.scene.add.line(0, 0, prev.x, prev.y, j.x, j.y, 0x0000ff);
+                }
+                
                 line.lineWidth = 5;
                 line.h1 = prev;
                 line.h2 = j;
@@ -105,7 +135,18 @@ class Player {
             this.scene.matter.add.joint(prev, l, 90, 1);
 
             // dispay line
-            let line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0x0000ff);
+            // change line colors depending on limb
+            // n = 0 == neck
+            // n = 1 or 4 == arms
+            // n = 2 or 3 == legs
+            let line;
+            if( n == 1 || n == 4){
+                line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0xfcac04);
+            }else if(n == 0){
+                line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0xf60e0e);
+            }else{
+                line = this.scene.add.line(0, 0, prev.x, prev.y, l.x, l.y, 0x0000ff);
+            }
             line.lineWidth = 5;
             line.h1 = prev;
             line.h2 = l;
