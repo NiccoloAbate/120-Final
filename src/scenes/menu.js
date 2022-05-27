@@ -89,7 +89,14 @@ class Menu extends Phaser.Scene {
         this.matter.world.setBounds();
         var Bodies = Phaser.Physics.Matter.Matter.Bodies;
 
-        this.player = new Player(this);        
+        this.player = new Player(this);  
+        this.tweens.add({
+            targets:this.player.limbs[1],
+            scale:1.1,
+            duration:300,
+            yoyo: true,
+            repeat:-1
+        });      
 
         // test hitbox to start game
         this.startGameHitBox = this.matter.add.image(width / 5, height / 3, 'playButton', null,
@@ -97,6 +104,13 @@ class Menu extends Phaser.Scene {
         this.startGameHitBox.setOrigin(0.5, 0.5);
         this.startGameHitBox.setScale(1,1);
         this.startGameHitBox.setDepth(-1);
+        this.tweens.add({
+            targets:this.startGameHitBox,
+            scale:1.1,
+            duration:300,
+            yoyo: true,
+            repeat:-1
+        });
 
         // demo of callbacks
         this.player.dragCallbacks.dragStart.push(l => console.log('drag start'));
