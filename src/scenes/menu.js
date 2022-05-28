@@ -89,13 +89,14 @@ class Menu extends Phaser.Scene {
         this.matter.world.setBounds();
         var Bodies = Phaser.Physics.Matter.Matter.Bodies;
 
-        this.player = new Player(this);  
+        this.player = new Player(this);
+        // left hand yoyo tween to grab attention
         this.tweens.add({
-            targets:this.player.limbs[1],
-            scale:1.1,
-            duration:300,
+            targets: this.player.limbs[this.player.leftArmID],
+            scale: 1.1,
+            duration: 300,
             yoyo: true,
-            repeat:-1
+            repeat: -1
         });      
 
         // test hitbox to start game
@@ -104,12 +105,30 @@ class Menu extends Phaser.Scene {
         this.startGameHitBox.setOrigin(0.5, 0.5);
         this.startGameHitBox.setScale(1,1);
         this.startGameHitBox.setDepth(-1);
+        // yoyo tween to grab attention
         this.tweens.add({
-            targets:this.startGameHitBox,
-            scale:1.1,
-            duration:300,
+            targets: this.startGameHitBox,
+            scale: 1.1,
+            duration: 300,
             yoyo: true,
-            repeat:-1
+            repeat: -1
+        });
+
+        // line to show relation between hand and button
+        this.grabMeLine = this.add.line(0, 0, this.startGameHitBox.x, this.startGameHitBox.y,
+            this.player.limbs[this.player.leftArmID].x, this.player.limbs[this.player.leftArmID].y, 0xffffff);
+        this.grabMeLine.h1 = this.startGameHitBox;
+        this.grabMeLine.h2 = this.player.limbs[this.player.leftArmID];
+        this.grabMeLine.lineWidth = 1;
+        this.grabMeLine.setOrigin(0.0, 0.0);
+        this.grabMeLine.setDepth(1.0);
+        // yoyo tween for the line too
+        this.tweens.add({
+            targets: this.grabMeLine,
+            alpha: { from: 1.0, to: 0.25 },
+            duration: 300,
+            yoyo: true,
+            repeat: -1
         });
 
         // demo of callbacks
@@ -154,7 +173,7 @@ class Menu extends Phaser.Scene {
 
         // create background
         this.background = this.matter.add.image(0, 0, 'menuBackground', null, {ignoreGravity: true, isSensor: true});
-        this.background.setDepth(-2);
+        this.background.setDepth(-5);
         this.background.displayWidth = Game.config.width;
         this.background.displayHeight = Game.config.height;
         this.background.x = this.background.displayWidth / 2;
@@ -245,6 +264,10 @@ class Menu extends Phaser.Scene {
                 repeat: 0 
             });
         }
+
+        let l = this.grabMeLine;
+        let lH = this.computeConnectionLinePoints(l.h1, l.h2, 100, 65);
+        l.setTo(lH.h1.x, lH.h1.y, lH.h2.x, lH.h2.y);
     }
 
     startGame() {
@@ -252,5 +275,27 @@ class Menu extends Phaser.Scene {
     }
 
     defineKeys() {
+    }
+
+    computeConnectionLinePoints(h1, h2, h1EdgeDist = 0, h2EdgeDist = 0) {
+        let diff = { x: (h2.x - h1.x), y: (h2.y - h1.y) };
+        let distSqrd = (diff.x * diff.x) + (diff.y * diff.y);
+        let dist = Math.sqrt(distSqrd);
+
+        let h1DistRat = clamp(h1EdgeDist / dist, 0.0, 0.5);
+        let h1EdgeDiff = { x: (diff.x * h1DistRat), y: (diff.y * h1DistRat) };
+        let h2DistRat = clamp(h2EdgeDist / dist, 0.0, 0.5);
+        let h2EdgeDiff = { x: (diff.x * h2DistRat), y: (diff.y * h2DistRat) };
+
+        return {
+            h1: {
+                x: h1.x + h1EdgeDiff.x,
+                y: h1.y + h1EdgeDiff.y
+            },
+            h2: {
+                x: h2.x - h2EdgeDiff.x,
+                y: h2.y - h2EdgeDiff.y
+            }
+        };
     }
 }
