@@ -13,6 +13,17 @@ class GameOver extends Phaser.Scene {
         this.background.displayHeight = Game.config.height;
         this.background.x = this.background.displayWidth / 2;
         this.background.y = this.background.displayHeight / 2;
+        this.background.alpha = 0;
+
+        const delayTime = 500;
+        const fadeTime = 1500;
+        this.time.delayedCall(delayTime, () => {
+            this.tweens.add({
+                targets: this.background,
+                alpha: { from: 0.0, to: 1.0 },
+                duration: fadeTime,
+            });
+        });
     }
 
     update(time, delta) {

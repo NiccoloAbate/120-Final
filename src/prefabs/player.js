@@ -36,10 +36,10 @@ class Player {
         // limb spawn positions -- might be too far from torso right now?
         let limbPositions = [
             {x: width / 2, y: height / 4},
-            {x: width / 4, y: height / 3},
+            {x: width / 3 - 10, y: height / 3},
             {x: width / 3, y: (height / 4) * 3},
             {x: (width / 3) * 2, y: (height / 4) * 3},
-            {x: (width / 4) * 3, y: height / 3}
+            {x: (width / 3) * 2 + 10, y: height / 3}
         ];
         // number of joints per limb
         let nLimbJoints = [2, 3, 4, 4, 3];
@@ -154,7 +154,7 @@ class Player {
             this.limbLines.push(line);
         }
 
-        this.limbs[this.rightArmID].flipX = true;
+        this.limbs[this.leftArmID].flipX = true;
         this.limbs[this.rightFootID].flipX = true;
 
         // allows mouse to click and drag bodies

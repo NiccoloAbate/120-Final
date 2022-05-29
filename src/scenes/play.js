@@ -211,13 +211,13 @@ class Play extends Phaser.Scene {
             // if this remains true 3 seconds
             if (!this.playerInHole) {
                 this.playerInHole = true;
-                this.playSuccessSound();
+                this.playEnterSound();
             }
         }
         else {
             if (this.playerInHole) {
                 this.playerInHole = false;
-                this.playFailureSound();
+                this.playExitSound();
             }
         }
 
@@ -368,6 +368,7 @@ class Play extends Phaser.Scene {
         this.quitButton.setOrigin(0.5, 0.5);
         this.quitButton.setScale(1,1);
         this.quitButton.setDepth(-1);
+        this.quitButton.alpha = 0.0; 
 
         this.player.dragOverlapTargets.push(this.quitButton);
         // hand animations, maybe should refactor into 'grabable' in player.js or something
@@ -405,6 +406,7 @@ class Play extends Phaser.Scene {
         this.retryButton.setOrigin(0.5, 0.5);
         this.retryButton.setScale(1,1);
         this.retryButton.setDepth(-1);
+        this.retryButton.alpha = 0.0; 
 
         this.player.dragOverlapTargets.push(this.retryButton);
         // hand animations, maybe should refactor into 'grabable' in player.js or something
@@ -436,6 +438,16 @@ class Play extends Phaser.Scene {
                 });
             }
         });
+
+        const delayTime = 500;
+        const fadeTime = 1500;
+        this.time.delayedCall(delayTime, () => {
+            this.tweens.add({
+                targets: [this.retryButton, this.quitButton],
+                alpha: { from: 0.0, to: 1.0 },
+                duration: fadeTime,
+            });
+        });
     }
 
     setGameVictory() {
@@ -456,6 +468,12 @@ class Play extends Phaser.Scene {
         this.sound.play('ding', { volume: 0.2 });
     }
     playFailureSound() {
+        this.sound.play('wallHit', { volume: 0.9 });
+    }
+    playEnterSound() {
+        this.sound.play('ding', { volume: 0.2 });
+    }
+    playExitSound() {
         this.sound.play('ding', { volume: 0.2, detune: -1200 });
     }
 
@@ -467,8 +485,9 @@ class Play extends Phaser.Scene {
                     { isSensor: true, ignoreGravity: true });
                 let scale = ((b.width / hitSprite.displayWidth) * 1.15) + 0.3;
                 hitSprite.setScale(scale, scale);
-                hitSprite.setDepth(1);
+                hitSprite.setDepth(-1);
 
+                /*
                 let fadeTime = 1000 + getRandomIntInclusive(-100, 100);
                 this.tweens.add({
                     targets: hitSprite,
@@ -482,6 +501,7 @@ class Play extends Phaser.Scene {
                 this.time.delayedCall(fadeTime + 100, () => {
                     hitSprite.destroy();
                 });
+                */
             }
         }
     }

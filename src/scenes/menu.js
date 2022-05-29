@@ -70,6 +70,7 @@ class Menu extends Phaser.Scene {
 
         // misc sfx
         this.load.audio('click', 'assets/sfx/Click 01.wav');
+        this.load.audio('wallHit', 'assets/sfx/WallHit.wav');
 
         // music
         Audio.preloadMulti(this, 'Track1', Track1StemFileNames, Track1StemNames);
@@ -119,7 +120,7 @@ class Menu extends Phaser.Scene {
             this.player.limbs[this.player.leftArmID].x, this.player.limbs[this.player.leftArmID].y, 0xffffff);
         this.grabMeLine.h1 = this.startGameHitBox;
         this.grabMeLine.h2 = this.player.limbs[this.player.leftArmID];
-        this.grabMeLine.lineWidth = 1;
+        this.grabMeLine.lineWidth = 3;
         this.grabMeLine.setOrigin(0.0, 0.0);
         this.grabMeLine.setDepth(1.0);
         // yoyo tween for the line too
