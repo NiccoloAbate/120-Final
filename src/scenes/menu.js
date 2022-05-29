@@ -186,10 +186,12 @@ class Menu extends Phaser.Scene {
         this.grabMeBackground.displayHeight = Game.config.height;
         this.grabMeBackground.x = this.grabMeBackground.displayWidth / 2;
         this.grabMeBackground.y = this.grabMeBackground.displayHeight / 2;
+        this.grabMeBackground.setVisible(false);
 
         // click and drag me message that follows hand
         this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
         this.clickAndDragMe.setDepth(1);
+        this.clickAndDragMe.setVisible(false);
         this.timeSinceGrabMe = 100 * UpdateTime.sRatio;
         this.timeBetweenGrabMeMessages = 10 * UpdateTime.sRatio;
 
