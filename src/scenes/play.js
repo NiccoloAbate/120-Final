@@ -363,11 +363,11 @@ class Play extends Phaser.Scene {
         let height = Game.config.height;
 
         // test hitbox to start game
-        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'quitButton', null,
+        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'menuButton', null,
             { ignoreGravity: true, isSensor: true });
         this.quitButton.setOrigin(0.5, 0.5);
         this.quitButton.setScale(1,1);
-        this.quitButton.setDepth(-1);
+        this.quitButton.setDepth(-0.5);
         this.quitButton.alpha = 0.0; 
 
         this.player.dragOverlapTargets.push(this.quitButton);
@@ -405,7 +405,7 @@ class Play extends Phaser.Scene {
             { ignoreGravity: true, isSensor: true });
         this.retryButton.setOrigin(0.5, 0.5);
         this.retryButton.setScale(1,1);
-        this.retryButton.setDepth(-1);
+        this.retryButton.setDepth(-0.5);
         this.retryButton.alpha = 0.0; 
 
         this.player.dragOverlapTargets.push(this.retryButton);

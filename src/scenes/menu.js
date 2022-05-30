@@ -40,7 +40,7 @@ class Menu extends Phaser.Scene {
 
         // menu assets
         this.load.image('playButton', 'assets/sprites/PlayButton.png');
-        this.load.image('quitButton', 'assets/sprites/QuitButton.png');
+        this.load.image('menuButton', 'assets/sprites/MainMenuButton.png');
         this.load.image('retryButton', 'assets/sprites/RetryButton.png');
         this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
 

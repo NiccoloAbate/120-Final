@@ -1,11 +1,11 @@
-// Victory scene
+// mid scene
 class GameScene extends Phaser.Scene {
     constructor() {
         super("gamescene");
     }
 
     preload() {
-        this.load.image('gameScene1', 'assets/sprites/Scene1.png');
+        this.load.image('gameScene1', 'assets/sprites/Midscene.png');
     }
 
     create() {
