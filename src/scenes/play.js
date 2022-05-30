@@ -483,7 +483,8 @@ class Play extends Phaser.Scene {
                 let tex = 'hit0';
                 let hitSprite = this.matter.add.image(b.x, b.y, tex, null,
                     { isSensor: true, ignoreGravity: true });
-                let scale = ((b.width / hitSprite.displayWidth) * 1.15) + 0.3;
+                let scaleAdd = 0.4 * this.percentInHole;
+                let scale = ((b.width / hitSprite.displayWidth) * 1.15) + scaleAdd;
                 hitSprite.setScale(scale, scale);
                 hitSprite.setDepth(-1);
 
