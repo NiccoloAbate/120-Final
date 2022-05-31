@@ -49,6 +49,7 @@ class Menu extends Phaser.Scene {
         this.load.image('clickAndDragMe', 'assets/sprites/ClickAndDragMe.png');
 
         this.load.image('cake', 'assets/sprites/cake.png');
+        this.load.image('victoryBackground', 'assets/sprites/FinalScene.png');
 
 
         // player assets
@@ -60,6 +61,14 @@ class Menu extends Phaser.Scene {
         this.load.image('jointOrange', 'assets/sprites/JointsOrange.png');
         this.load.image('jointRed', 'assets/sprites/JointsRed.png');
         this.load.image('torso', 'assets/sprites/Torso.png');
+        this.load.image('head-greyed', 'assets/sprites/Head.png');
+        this.load.image('handclosed-greyed', 'assets/sprites/Hand-CartoonyGlove-Orange-Closed.png');
+        this.load.image('handopen-greyed', 'assets/sprites/Hand-CartoonyGlove-Orange-Open.png');
+        this.load.image('feet-greyed', 'assets/sprites/Shoe.png');
+        this.load.image('jointBlue-greyed', 'assets/sprites/Joints.png');
+        this.load.image('jointOrange-greyed', 'assets/sprites/JointsOrange.png');
+        this.load.image('jointRed-greyed', 'assets/sprites/JointsRed.png');
+        this.load.image('torso-greyed', 'assets/sprites/Torso.png');
 
         for (let i = 1; i <= playerMoveStartSounds; ++i) {
             this.load.audio('playerStart' + i, 'assets/sfx/player/Start 0' + i + '.wav');
@@ -106,14 +115,6 @@ class Menu extends Phaser.Scene {
         this.startGameHitBox.setOrigin(0.5, 0.5);
         this.startGameHitBox.setScale(1,1);
         this.startGameHitBox.setDepth(-1);
-        // yoyo tween to grab attention
-        this.tweens.add({
-            targets: this.startGameHitBox,
-            scale: 1.1,
-            duration: 300,
-            yoyo: true,
-            repeat: -1
-        });
 
         // line to show relation between hand and button
         this.grabMeLine = this.add.line(0, 0, this.startGameHitBox.x, this.startGameHitBox.y,
@@ -192,13 +193,26 @@ class Menu extends Phaser.Scene {
         // click and drag me message that follows hand
         this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
         this.clickAndDragMe.setDepth(1);
-        this.clickAndDragMe.setVisible(false);
+        this.clickAndDragMe.setVisible(false); // considering making this visible again...
         this.timeSinceGrabMe = 100 * UpdateTime.sRatio;
         this.timeBetweenGrabMeMessages = 10 * UpdateTime.sRatio;
+        this.firstDrag = true;
 
         // drag me message callback
         this.player.dragCallbacks.dragStart.push((l, t) => {
             if (l == this.player.limbs[this.player.leftArmID]) {
+                if (this.firstDrag) {
+                    this.firstDrag = false;
+                    // yoyo tween to grab attention
+                    this.tweens.add({
+                        targets: this.startGameHitBox,
+                        scale: 1.1,
+                        duration: 300,
+                        yoyo: true,
+                        repeat: -1
+                    });
+                }
+
                 if (this.timeSinceGrabMe < this.timeBetweenGrabMeMessages) {
                     return;
                 }
@@ -240,7 +254,7 @@ class Menu extends Phaser.Scene {
                 l.setTexture('handclosed');
                 l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
                 this.sound.play('click', { volume: 3.0, detune: 1200 });
-                this.player.dragOverlapTargets.splice(this.player.dragOverlapTargets.indexOf(this.cake));
+                this.player.dragOverlapTargets.splice(this.player.dragOverlapTargets.indexOf(this.cake, 1));
                 this.cake.destroy(); // placeholder for something more exciting happening
             }
         });

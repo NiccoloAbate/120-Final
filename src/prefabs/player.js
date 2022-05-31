@@ -22,6 +22,8 @@ class Player {
         this.torso.setFixedRotation();
         this.torso.setMass(40000);
         this.torso.setDepth(1);
+        this.torso.tex = 'torso';
+        this.torso.greyTex = this.torso.tex + '-greyed';
 
         this.bodies.push(this.torso);
 
@@ -48,6 +50,9 @@ class Player {
         let limbTypes = ['head', 'hand', 'feet', 'feet', 'hand'];
         let limbImage = ['head', 'handclosed', 'feet', 'feet', 'handclosed'];
         let limbScales = [0.65, 0.8, 0.6, 0.6, 0.8];
+        let enlargedLimbScales = [0.8, 1.05, 0.8, 0.8, 1.05];
+        this.limbScales = limbScales;
+        this.enlargedLimbScales = enlargedLimbScales;
 
         this.limbs = new Array(this.nLimbs);
         this.limbJoints = new Array(this.nLimbs);
@@ -59,6 +64,8 @@ class Player {
             this.limbs[n] = this.scene.matter.add.image(lPos.x, lPos.y, limbImage[n], null,
                 { shape: 'circle', ignoreGravity: true });
             let l = this.limbs[n];
+            l.tex = limbImage[n];
+            l.greyTex = l.tex + '-greyed';
 
             l.setOrigin(0.5, 0.5);
             l.setScale(limbScales[n], limbScales[n]);
@@ -86,20 +93,20 @@ class Player {
                 // n = 0 == neck
                 // n = 1 or 4 == arms
                 // n = 2 or 3 == legs
+                let tex;
                 if( n == 1 || n == 4){
-                    lj[i] = this.scene.matter.add.image(x, y, 'jointOrange', null,
-                    { shape: 'circle', mass: 5, ignoreGravity: true });
-                    
+                    tex = 'jointOrange';
                 }else if(n == 0){
-                    lj[i] = this.scene.matter.add.image(x, y, 'jointRed', null,
-                    { shape: 'circle', mass: 5, ignoreGravity: true });
+                    tex = 'jointRed';
                     
                 }else{
-                    lj[i] = this.scene.matter.add.image(x, y, 'jointBlue', null,
-                    { shape: 'circle', mass: 5, ignoreGravity: true });
-                    
+                    tex = 'jointBlue';
                 }
-                
+                lj[i] = this.scene.matter.add.image(x, y, tex, null,
+                    { shape: 'circle', mass: 5, ignoreGravity: true });
+                lj[i].tex = tex;
+                lj[i].greyTex = tex + '-greyed';
+
                 let j = lj[i];
 
                 j.setScale(2, 2);

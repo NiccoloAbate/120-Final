@@ -73,16 +73,16 @@ class Play extends Phaser.Scene {
                 duration: 20000,
             },
             { 
-                // # 7 thin outline
-                duration: 25000,
+                // # 7 L in bottom left corner
+                duration: 15000,
             },
             { 
-                // # 8 L in bottom left corner
+                // # 8 arrow pointing to top right
                 duration: 20000,
             },
             { 
-                // # 9 arrow pointing to top right
-                duration: 28000,
+                // # 9 think outline
+                duration: 30000,
             }
         ]
         this.holeID = holeStartID;
@@ -281,7 +281,7 @@ class Play extends Phaser.Scene {
     }
 
     wallCheck() {
-        if (this.isPlayerInHole()) {
+        if (true) { //this.isPlayerInHole()
             console.log('you did it!');
             this.playSuccessSound();
             return true;
@@ -339,13 +339,15 @@ class Play extends Phaser.Scene {
                     ) === 0)) {
                     // in hole
                     ++nInHole;
-                    b.tint = 0xffffff; // tint doesn't work... but something like this!
                     b.insideHole = true;
+                    b.setTexture(b.tex); // nothing :(
+                    //b.tint = 0xffffff; // tint doesn't work... but something like this!
                 }
                 else {
                     // not in hole
                     b.insideHole = false;
-                    b.tint = 0x000000;
+                    b.setTexture(b.greyTex); // this doesn't work either???
+                    //b.tint = 0x000000;
                     console.log('tint!'); // tint doesn't work... but something like this!
                 }
             }
@@ -375,14 +377,14 @@ class Play extends Phaser.Scene {
         this.player.dragCallbacks.overlapEnter.push((l, t) => {
             if (t == this.quitButton && l.limbType == 'hand') {
                 l.setTexture('handopen');
-                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                l.setScale(this.player.enlargedLimbScales[this.player.leftArmID], this.player.enlargedLimbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 600 });
             }
         });
         this.player.dragCallbacks.overlapExit.push((l, t) => {
             if (t == this.quitButton && l.limbType == 'hand') {
                 l.setTexture('handclosed');
-                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 600 });
             }
         });
@@ -390,7 +392,7 @@ class Play extends Phaser.Scene {
         this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
             if (overlapped.includes(this.quitButton) && l.limbType == 'hand') {
                 l.setTexture('handclosed');
-                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 1200 });
                 this.time.delayedCall(250, () => {
                     this.Track1.destroy();
@@ -413,14 +415,14 @@ class Play extends Phaser.Scene {
         this.player.dragCallbacks.overlapEnter.push((l, t) => {
             if (t == this.retryButton && l.limbType == 'hand') {
                 l.setTexture('handopen');
-                l.setScale(l.scaleX * 1.3, l.scaleY * 1.3);
+                l.setScale(this.player.enlargedLimbScales[this.player.leftArmID], this.player.enlargedLimbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 600 });
             }
         });
         this.player.dragCallbacks.overlapExit.push((l, t) => {
             if (t == this.retryButton && l.limbType == 'hand') {
                 l.setTexture('handclosed');
-                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 600 });
             }
         });
@@ -428,7 +430,7 @@ class Play extends Phaser.Scene {
         this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
             if (overlapped.includes(this.retryButton) && l.limbType == 'hand') {
                 l.setTexture('handclosed');
-                l.setScale(l.scaleX / 1.3, l.scaleY / 1.3);
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
                 this.sound.play('click', { volume: 3.0, detune: 1200 });
                 this.time.delayedCall(250, () => {
                     this.Track1.destroy();
@@ -454,6 +456,144 @@ class Play extends Phaser.Scene {
         //this.scene.pause();
         Game.scene.start('gamevictory');
         this.gameOver = true;
+
+        let width = Game.config.width;
+        let height = Game.config.height;
+
+        this.destroyWall();
+
+        this.vbackground = this.matter.add.image(0, 0, 'victoryBackground', null, {ignoreGravity: true, isSensor: true});
+        this.vbackground.setDepth(-2);
+        this.vbackground.displayWidth = Game.config.width;
+        this.vbackground.displayHeight = Game.config.height;
+        this.vbackground.x = this.vbackground.displayWidth / 2;
+        this.vbackground.y = this.vbackground.displayHeight / 2;
+
+        // test hitbox to start game
+        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'menuButton', null,
+            { ignoreGravity: true, isSensor: true });
+        this.quitButton.setOrigin(0.5, 0.5);
+        this.quitButton.setScale(1,1);
+        this.quitButton.setDepth(-0.5);
+        this.quitButton.alpha = 0.0; 
+
+        this.player.dragOverlapTargets.push(this.quitButton);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
+        this.player.dragCallbacks.overlapEnter.push((l, t) => {
+            if (t == this.quitButton && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(this.player.enlargedLimbScales[this.player.leftArmID], this.player.enlargedLimbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.quitButton && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        // start game when release limb over the quitButton
+        this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+            if (overlapped.includes(this.quitButton) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 1200 });
+                this.time.delayedCall(250, () => {
+                    this.Track1.destroy();
+                    Game.scene.start("menu");
+                    Game.scene.stop("gamevictory");
+                    this.scene.stop();
+                });
+            }
+        });
+
+        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 3) * 2, 'retryButton', null,
+            { ignoreGravity: true, isSensor: true });
+        this.retryButton.setOrigin(0.5, 0.5);
+        this.retryButton.setScale(1,1);
+        this.retryButton.setDepth(-0.5);
+        this.retryButton.alpha = 0.0; 
+
+        this.player.dragOverlapTargets.push(this.retryButton);
+        // hand animations, maybe should refactor into 'grabable' in player.js or something
+        this.player.dragCallbacks.overlapEnter.push((l, t) => {
+            if (t == this.retryButton && l.limbType == 'hand') {
+                l.setTexture('handopen');
+                l.setScale(this.player.enlargedLimbScales[this.player.leftArmID], this.player.enlargedLimbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        this.player.dragCallbacks.overlapExit.push((l, t) => {
+            if (t == this.retryButton && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 600 });
+            }
+        });
+        // start game when release limb over the retryButton
+        this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+            if (overlapped.includes(this.retryButton) && l.limbType == 'hand') {
+                l.setTexture('handclosed');
+                l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                this.sound.play('click', { volume: 3.0, detune: 1200 });
+                this.time.delayedCall(250, () => {
+                    holeStartID = 1; // start from the beginning
+                    this.Track1.destroy();
+                    Game.scene.stop("gamevictory");
+                    this.scene.restart();
+                    console.log("still going?");
+                });
+            }
+        });
+
+        const delayTime = 500;
+        const fadeTime = 1500;
+        this.time.delayedCall(delayTime, () => {
+            this.tweens.add({
+                targets: [this.retryButton, this.quitButton],
+                alpha: { from: 0.0, to: 1.0 },
+                duration: fadeTime,
+            });
+        });
+
+        // create cakes
+        let nCakes = 5;
+        this.cakes = new Array(nCakes);
+        for (let i = 0; i < nCakes; ++i) {
+            let cake = this.matter.add.image(3 * (width / 4), height / 3, 'cake', null, {ignoreGravity: true, isSensor: true});
+            cake.x = getRandomInt(cake.width / 2, width - (cake.width / 2));
+            cake.y = getRandomInt(cake.height / 2, height - (cake.height / 2));
+            cake.setDepth(-1);
+
+            this.cakes[i] = cake;
+            this.player.dragOverlapTargets.push(this.cakes[i]);
+            // hand animations, maybe should refactor into 'grabable' in player.js or something
+            this.player.dragCallbacks.overlapEnter.push((l, t) => {
+                if (t == this.cakes[i] && l.limbType == 'hand') {
+                    l.setTexture('handopen');
+                    l.setScale(this.player.enlargedLimbScales[this.player.leftArmID], this.player.enlargedLimbScales[this.player.leftArmID]);
+                    this.sound.play('click', { volume: 3.0, detune: 600 });
+                }
+            });
+            this.player.dragCallbacks.overlapExit.push((l, t) => {
+                if (t == this.cakes[i] && l.limbType == 'hand') {
+                    l.setTexture('handclosed');
+                    l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                    this.sound.play('click', { volume: 3.0, detune: 600 });
+                }
+            });
+            // do something when you grab the cake!
+            this.player.dragCallbacks.dragEnd.push((l, overlapped) => {
+                if (overlapped.includes(this.cakes[i]) && l.limbType == 'hand') {
+                    l.setTexture('handclosed');
+                    l.setScale(this.player.limbScales[this.player.leftArmID], this.player.limbScales[this.player.leftArmID]);
+                    this.sound.play('click', { volume: 3.0, detune: 1200 });
+                    this.player.dragOverlapTargets.splice(this.player.dragOverlapTargets.indexOf(this.cakes[i], 1));
+                    this.cakes[i].destroy(); // placeholder for something more exciting happening
+                }
+            });
+        }
     }
 
     setNextScene() {
