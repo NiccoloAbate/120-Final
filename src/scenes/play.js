@@ -119,6 +119,7 @@ class Play extends Phaser.Scene {
         
         this.wallTimeBar = this.add.rectangle(borderUISize, borderUISize, 250, 30, '0x0000ff');
         this.wallTimeBar.setOrigin(0, 0);
+        this.wallTimeBar.setVisible(true); // no longer adds anything to game?
 
         // create background
         this.background = this.matter.add.image(0, 0, 'background', null, {ignoreGravity: true, isSensor: true});
