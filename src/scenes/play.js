@@ -175,20 +175,26 @@ class Play extends Phaser.Scene {
 
                     // fade
                     const fadeTime = 1000;
+                    const destroyTime = 5000;
                     this.oldWallImage = this.currentWallImage;
                     this.oldWallOutline = this.currentWallOutline;
+                    this.oldWallCollision = this.currentWallCollision;
+                    this.oldWallTileLeft = this.currentWallTileLeft;
+                    this.oldWallTileRight = this.currentWallTileRight;
                     this.tweens.add({
-                        targets: [this.oldWallImage, this.oldWallOutline],
+                        targets: [this.oldWallImage, this.oldWallOutline, this.oldWallTileLeft, this.oldWallTileRight],
                         alpha: { from: 1.0, to: 0.0},
                         duration: fadeTime,
                         ease: 'Linear',
                         repeat: 0 
                     });
-                    this.time.delayedCall(fadeTime, () => {
+                    this.time.delayedCall(destroyTime, () => {
                         this.oldWallImage.destroy();
                         this.oldWallOutline.destroy();
+                        this.oldWallCollision.destroy();
+                        this.oldWallTileLeft.destroy();
+                        this.oldWallTileRight.destroy();
                     });
-                    this.currentWallCollision.destroy();
 
                     // generate next wall
                     this.generateWall();
@@ -229,9 +235,26 @@ class Play extends Phaser.Scene {
         let NormalVol = this.globalMusicVolume - FilteredVol;
         this.Track1.setConfig('Normal', {volume: NormalVol});
         this.Track1.setConfig('Filtered', {volume: FilteredVol});
+
+        // wall tile sprite
+        let leftTileWidth = (this.currentWallImage.getTopLeft().x / this.currentWallTileLeft.scaleX) + 5;
+        let rightTileWidth = ((Game.config.width - this.currentWallImage.getTopRight().x)  / this.currentWallTileRight.scaleX) + 5;
+        console.log(leftTileWidth);
+        console.log(rightTileWidth);
+        this.currentWallTileLeft.x = 0;
+        this.currentWallTileLeft.y = this.currentWallImage.getTopLeft().y;
+        this.currentWallTileRight.x = this.currentWallImage.getTopRight().x - 5;
+        this.currentWallTileRight.y = this.currentWallImage.getTopLeft().y;
+        this.currentWallTileLeft.width = Math.max(leftTileWidth, 1);
+        this.currentWallTileRight.width = Math.max(rightTileWidth, 1);
+        this.currentWallTileLeft.height = Math.max(this.currentWallImage.displayHeight, 1);
+        this.currentWallTileRight.height = Math.max(this.currentWallImage.displayHeight, 1);
     }
 
     generateWall() {
+        let width = Game.config.width;
+        let height = Game.config.height;
+
         this.currentHoleInfo = this.holes[this.holeID - 1];
         let holeText = 'hole' + this.holeID;
         let holeOutlineText = 'hole' + this.holeID + 'outline';
@@ -243,6 +266,15 @@ class Play extends Phaser.Scene {
         this.currentWallCollision.x = this.currentWallCollision.displayWidth / 2;
         this.currentWallCollision.y = this.currentWallCollision.displayHeight / 2;
         this.currentWallCollision.setAlpha(0);
+
+        this.currentWallTileLeft = this.add.rectangle(0, 0, width / 2, this.currentWallCollision.height, 0x9d9c9b);
+        this.currentWallTileLeft.setOrigin(0.0, 0.0);
+        this.currentWallTileLeft.setDepth(-1);
+        this.currentWallTileRight = this.add.rectangle(0, 0, width / 2, this.currentWallCollision.height, 0x9d9c9b);
+        this.currentWallTileRight.setOrigin(0.0, 0.0);
+        this.currentWallTileRight.setDepth(-1);
+        //this.currentWallTileLeft.setVisible(false);
+        //this.currentWallTileRight.setVisible(false);
 
         this.currentWallImage = this.matter.add.image(0, 0, holeText, null, {ignoreGravity: true, isSensor: true});
         this.currentWallImage.setDepth(-1);
@@ -282,9 +314,10 @@ class Play extends Phaser.Scene {
     }
 
     wallCheck() {
-        if (true) { //this.isPlayerInHole()
+        if (this.isPlayerInHole()) {
             console.log('you did it!');
             this.playSuccessSound();
+            this.spawnSuccessParticles();
             return true;
         }
         else {
@@ -366,7 +399,7 @@ class Play extends Phaser.Scene {
         let height = Game.config.height;
 
         // test hitbox to start game
-        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'menuButton', null,
+        this.quitButton = this.matter.add.image(width / 5, (height / 5) * 4, 'menuButton', null,
             { ignoreGravity: true, isSensor: true });
         this.quitButton.setOrigin(0.5, 0.5);
         this.quitButton.setScale(1,1);
@@ -404,7 +437,7 @@ class Play extends Phaser.Scene {
             }
         });
 
-        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 3) * 2, 'retryButton', null,
+        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 5) * 4, 'retryButton', null,
             { ignoreGravity: true, isSensor: true });
         this.retryButton.setOrigin(0.5, 0.5);
         this.retryButton.setScale(1,1);
@@ -471,7 +504,7 @@ class Play extends Phaser.Scene {
         this.vbackground.y = this.vbackground.displayHeight / 2;
 
         // test hitbox to start game
-        this.quitButton = this.matter.add.image(width / 5, (height / 3) * 2, 'menuButton', null,
+        this.quitButton = this.matter.add.image(width / 5, (height / 5) * 4, 'menuButton', null,
             { ignoreGravity: true, isSensor: true });
         this.quitButton.setOrigin(0.5, 0.5);
         this.quitButton.setScale(1,1);
@@ -509,7 +542,7 @@ class Play extends Phaser.Scene {
             }
         });
 
-        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 3) * 2, 'retryButton', null,
+        this.retryButton = this.matter.add.image((width / 5) * 4, (height / 5) * 4, 'retryButton', null,
             { ignoreGravity: true, isSensor: true });
         this.retryButton.setOrigin(0.5, 0.5);
         this.retryButton.setScale(1,1);
@@ -646,6 +679,68 @@ class Play extends Phaser.Scene {
                 */
             }
         }
+    }
+
+    spawnSuccessParticles() {
+        let width = Game.config.width;
+        let height = Game.config.height;
+
+        /*
+        let deathZoneSource = {
+            contains: (x, y) => {
+                // hitTest(x, y) "tests if the coordinates are within this Body"
+                // https://newdocs.phaser.io/docs/3.54.0/Phaser.Physics.Arcade.Body#hitTest
+                let Wall = this.oldWallCollision;
+                let hit;
+                // Check center of the body against the texture
+                let xCheck = (x - Wall.getTopLeft().x) / Wall.scaleX;
+                let yCheck = (y - Wall.getTopLeft().y) / Wall.scaleY;
+                if ((this.textures.getPixelAlpha(
+                        Math.floor(xCheck),
+                        Math.floor(yCheck),
+                        Wall.texture.key
+                    ) === 0)) {
+                    hit = false;
+                }
+                else {
+                    hit = true;
+                }
+                return hit;
+            }
+        }
+        */
+
+        let nEmitters = 6;
+        let emitterTextures = ['confettiLightBlue', 'confettiDarkBlue', 'confettiGreen', 'confettiPink',
+            'confettiPurple', 'confettiYellow'];
+        this.particleManagers = new Array(nEmitters);
+        this.emitters = new Array(nEmitters);
+
+        for (let i = 0; i < nEmitters; ++i) {
+            this.particleManagers[i] = this.add.particles(emitterTextures[i]);
+            // create an emitter
+            this.emitters[i] = this.particleManagers[i].createEmitter({
+                x: {min: 0, max: width},
+                y: {min: 0, max: height},
+                gravityY: 400,
+                speed: 50,
+                frequency: 75,
+                scale: { start: 1, end: 0.1 },
+                alpha: { start: this.emitterAlpha, end: 0 },
+                // higher steps value = more time to go btwn min/max
+                lifespan: { min: 100, max: 1000, steps: 10 },
+            });
+        }
+        
+
+        const lifeTime = 1000;
+        this.time.delayedCall(lifeTime, () => {
+            this.emitters.forEach(e => e.stop());
+        });
+        this.time.delayedCall(1500 + 2000, () => {
+            this.emitters.forEach(e => e.remove());
+            this.particleManagers.forEach(m => m.destroy());
+        });
     }
 
     createDebugKeybinds() {

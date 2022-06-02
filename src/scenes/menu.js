@@ -30,6 +30,7 @@ class Menu extends Phaser.Scene {
         this.load.image('hole8outline', 'assets/sprites/WallBackground-Hole9Outline.png');
         this.load.image('hole9', 'assets/sprites/WallBackground-Hole10.png');
         this.load.image('hole9outline', 'assets/sprites/WallBackground-Hole10Outline.png');
+        this.load.image('wall', 'assets/sprites/WallBackground.png');
 
 
         this.load.image('background', 'assets/sprites/Background.png');
@@ -47,6 +48,7 @@ class Menu extends Phaser.Scene {
         this.load.image('menuBackground', 'assets/sprites/MenuBackground.png');
         this.load.image('grabMeBackground', 'assets/sprites/GrabMeBackground.png');
         this.load.image('clickAndDragMe', 'assets/sprites/ClickAndDragMe.png');
+        this.load.image('allCredits', 'assets/sprites/AllCredits.png');
 
         this.load.image('cake', 'assets/sprites/cake.png');
         this.load.image('victoryBackground', 'assets/sprites/FinalScene.png');
@@ -69,6 +71,14 @@ class Menu extends Phaser.Scene {
         this.load.image('jointOrange-greyed', 'assets/sprites/JointsOrange.png');
         this.load.image('jointRed-greyed', 'assets/sprites/JointsRed.png');
         this.load.image('torso-greyed', 'assets/sprites/Torso.png');
+
+        // particles
+        this.load.image('confettiDarkBlue', 'assets/sprites/ConfettiDarkBlue.png');
+        this.load.image('confettiGreen', 'assets/sprites/ConfettiGreen.png');
+        this.load.image('confettiLightBlue', 'assets/sprites/ConfettiLightBlue.png');
+        this.load.image('confettiPink', 'assets/sprites/ConfettiPink.png');
+        this.load.image('confettiPurple', 'assets/sprites/ConfettiPurple.png');
+        this.load.image('confettiYellow', 'assets/sprites/ConfettiYellow.png');
 
         for (let i = 1; i <= playerMoveStartSounds; ++i) {
             this.load.audio('playerStart' + i, 'assets/sfx/player/Start 0' + i + '.wav');
@@ -110,7 +120,7 @@ class Menu extends Phaser.Scene {
         });      
 
         // test hitbox to start game
-        this.startGameHitBox = this.matter.add.image(width / 5, height / 3, 'playButton', null,
+        this.startGameHitBox = this.matter.add.image(width / 5, height / 5, 'playButton', null,
             { ignoreGravity: true, isSensor: true });
         this.startGameHitBox.setOrigin(0.5, 0.5);
         this.startGameHitBox.setScale(1,1);
@@ -190,6 +200,14 @@ class Menu extends Phaser.Scene {
         this.grabMeBackground.y = this.grabMeBackground.displayHeight / 2;
         this.grabMeBackground.setVisible(false);
 
+        // create credits
+        this.credits = this.matter.add.image(0, 0, 'allCredits', null, {ignoreGravity: true, isSensor: true});
+        this.credits.setDepth(-5);
+        this.credits.displayWidth = Game.config.width;
+        this.credits.displayHeight = Game.config.height;
+        this.credits.x = this.credits.displayWidth / 2;
+        this.credits.y = this.credits.displayHeight / 2;
+
         // click and drag me message that follows hand
         this.clickAndDragMe = this.matter.add.image(0, 0, 'clickAndDragMe', null, {ignoreGravity: true, isSensor: true});
         this.clickAndDragMe.setDepth(1);
@@ -230,7 +248,7 @@ class Menu extends Phaser.Scene {
             }
         });
 
-        this.cake = this.matter.add.image(3 * (width / 4), height / 3, 'cake', null, {ignoreGravity: true, isSensor: true});
+        this.cake = this.matter.add.image(3 * (width / 4), height / 5, 'cake', null, {ignoreGravity: true, isSensor: true});
         this.cake.setDepth(-1);
         this.player.dragOverlapTargets.push(this.cake);
         // hand animations, maybe should refactor into 'grabable' in player.js or something
